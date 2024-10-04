@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "480800196676",
+    "project_id": "span-app-6fb40",
+    "storage_bucket": "span-app-6fb40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480800196676:android:2396733b7cb5ef9c30d411",
+        "android_client_info": {
+          "package_name": "com.span.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480800196676-970kgfibnr9edbeheap2v0v29pqca54d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.span.app",
+            "certificate_hash": "11d846e87ba5ebbd8a81fd363937bc64fc9b04b4"
+          }
+        },
+        {
+          "client_id": "480800196676-tsrc5r9t5haeqgjqk534df9umqj1ii9g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.span.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "480800196676-a9ftf9ad97uo0lhnj9815p3bccdl509h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJ6Y1VWJflAdIM-OGg1LdjaGhZSN0b0z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480800196676-a9ftf9ad97uo0lhnj9815p3bccdl509h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "480800196676-iehb094apdh5uljj1hi549d8pivn0h50.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.span.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

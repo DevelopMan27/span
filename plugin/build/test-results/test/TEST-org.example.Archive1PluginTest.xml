@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.Archive1PluginTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2024-07-15T06:23:52" hostname="GuruSoftware" time="2.674">
+  <properties/>
+  <testcase name="pluginRegistersATask()" classname="org.example.Archive1PluginTest" time="2.674"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

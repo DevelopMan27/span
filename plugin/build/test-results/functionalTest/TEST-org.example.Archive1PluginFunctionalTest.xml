@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.Archive1PluginFunctionalTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2024-07-15T06:23:58" hostname="GuruSoftware" time="10.104">
+  <properties/>
+  <testcase name="canRunTask()" classname="org.example.Archive1PluginFunctionalTest" time="10.104"/>
+  <system-out><![CDATA[
+> Task :greeting
+Hello from plugin 'org.example.greeting'
+
+BUILD SUCCESSFUL in 7s
+1 actionable task: 1 executed
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

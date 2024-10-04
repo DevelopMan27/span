@@ -1,0 +1,2 @@
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-src/CMakeLists.txt
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/src/main/cpp/CMakeLists.txt

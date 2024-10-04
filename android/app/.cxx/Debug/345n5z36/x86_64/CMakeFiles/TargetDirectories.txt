@@ -1,0 +1,5 @@
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/CMakeFiles/MyNativeModule.dir
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/CMakeFiles/edit_cache.dir
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/CMakeFiles/rebuild_cache.dir
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/_deps/json-build/CMakeFiles/edit_cache.dir
+/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/_deps/json-build/CMakeFiles/rebuild_cache.dir

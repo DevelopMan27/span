@@ -1,0 +1,21 @@
+# ninja log v5
+0	249	1727517441843190085	json-populate-prefix/src/json-populate-stamp/json-populate-mkdir	5732e108cfda0105
+0	249	1727517441843190085	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-mkdir	5732e108cfda0105
+250	42781	1727517484375466378	json-populate-prefix/src/json-populate-stamp/json-populate-download	2a2f71f690f2b5e8
+250	42781	1727517484375466378	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-download	2a2f71f690f2b5e8
+42781	42884	0	json-populate-prefix/src/json-populate-stamp/json-populate-update	bc06739458cc13a0
+42781	42884	0	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-update	bc06739458cc13a0
+42884	42925	1727517484519594596	json-populate-prefix/src/json-populate-stamp/json-populate-patch	9bb053577b102a9e
+42884	42925	1727517484519594596	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-patch	9bb053577b102a9e
+42925	42966	1727517484560671451	json-populate-prefix/src/json-populate-stamp/json-populate-configure	68ed98435e35e19b
+42925	42966	1727517484560671451	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-configure	68ed98435e35e19b
+42966	43009	1727517484603577691	json-populate-prefix/src/json-populate-stamp/json-populate-build	8b368110f3acf644
+42966	43009	1727517484603577691	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-build	8b368110f3acf644
+43009	43129	1727517484723773163	json-populate-prefix/src/json-populate-stamp/json-populate-install	aa92bd960d67fea2
+43009	43129	1727517484723773163	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-install	aa92bd960d67fea2
+43129	43170	1727517484764367352	json-populate-prefix/src/json-populate-stamp/json-populate-test	e6790dbb57617029
+43129	43170	1727517484764367352	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-test	e6790dbb57617029
+43170	43229	1727517484823559772	CMakeFiles/json-populate-complete	190437c2582a3b19
+43170	43229	1727517484823559772	json-populate-prefix/src/json-populate-stamp/json-populate-done	190437c2582a3b19
+43170	43229	1727517484823559772	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/CMakeFiles/json-populate-complete	190437c2582a3b19
+43170	43229	1727517484823559772	/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-subbuild/json-populate-prefix/src/json-populate-stamp/json-populate-done	190437c2582a3b19
