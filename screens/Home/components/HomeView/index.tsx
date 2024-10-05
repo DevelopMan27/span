@@ -6,9 +6,6 @@ import {
   Text,
   View,
   Linking,
-  Clipboard,
-  Alert,
-  ToastAndroid,
 } from "react-native";
 import { GlobalAppColor, GlobalStyle } from "../../../../CONST";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -40,9 +37,6 @@ import {
 import { MachineRecord } from "../../../../type";
 import { useNavigation } from "@react-navigation/native";
 import { RouteNames } from "../../../../navigation/routesNames";
-import { RefreshControl } from "react-native-gesture-handler";
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 
 export const HomeView = () => {
   const {
@@ -52,27 +46,57 @@ export const HomeView = () => {
     closeQRScanBottomSheetFun,
   } = useBottomSheetContext();
   const [name, setName] = useState("");
-
-  const [note, setNote] = useState("");
+  const userData = async () => {
+    const userDetails = await getUserData();
+    if (userDetails) {
+      setName(userDetails?.data?.user_name);
+    }
+  };
   const { navigate } = useNavigation();
   const greetingsWithName = `${getGreetingMessage()}, ${name}!`;
+  const note = `Sales Team Meeting will be scheduled on next saturday at office.`;
   const [invoiceData, setInvoiceData] = useState([]);
+  // const invoiceData = [
+  //   {
+  //     key: "1",
+  //     colors: ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
+  //     borderColor: "#BEC3CC",
+  //     statusColor: GlobalAppColor.GREEN,
+  //     companyName: "INTAS FARMA",
+  //     location: "(AHMEDABAD)",
+  //     status: "Approved",
+  //     invoiceNo: "SSN2334",
+  //     date: "21/01/2024",
+  //   },
+  //   {
+  //     key: "2",
+  //     colors: ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"],
+  //     borderColor: "#BEC3CC",
+  //     statusColor: GlobalAppColor.APPRED,
+  //     companyName: "INTAS FARMA",
+  //     location: "(AHMEDABAD)",
+  //     status: "Approved",
+  //     invoiceNo: "SSN2334",
+  //     date: "21/01/2024",
+  //   },
+  //   {
+  //     key: "3",
+  //     colors: ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"],
+  //     borderColor: "#BEC3CC",
+  //     statusColor: GlobalAppColor.APPRED,
+  //     companyName: "INTAS FARMA",
+  //     location: "(AHMEDABAD)",
+  //     status: "Approved",
+  //     invoiceNo: "SSN2334",
+  //     date: "21/01/2024",
+  //   },
+  // ];
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [todayLogin, setTodayLogin] = useState("");
   const [tomorrowLogin, setTomorrowLogin] = useState("");
   const [todayExit, setTodayExit] = useState("");
   const [tomorrowExit, setTomorrowExit] = useState("");
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    getProductList();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  };
-
   const onPress = () => {
     closeQRScanBottomSheetFun();
     setTimeout(function () {
@@ -108,7 +132,6 @@ export const HomeView = () => {
       setTomorrowExit(tomorrowExitValue);
     }
   }, [date]);
-
   function getNextDay(date: Date) {
     // Step 1: Create a Date object from the given date
     let givenDate = new Date(date);
@@ -119,98 +142,56 @@ export const HomeView = () => {
     // Step 3: Format the new date using toLocaleDateString
     return new Date(givenDate);
   }
+  const token = "";
+  const dObject = {
+    authorization: token,
+    input: {
+      mobile: "9723083820",
+      username: "Meetcpatel",
+      email: "meetcpatel906@gmail.com",
+      designation: "User",
+      fb_uid: "Firebase Uid",
+    },
+  };
+  const encodedData = btoa(JSON.stringify(dObject));
+  const finalData = { data: encodedData };
+  // //console.log("====finalData====", finalData);
 
   const sharePass = () => {
     //console.log("share my password");
     const message =
       `*SPAN - Daily Password*\n\n` +
-      `*Today :* ` +
-      new Date(date)?.toLocaleDateString() +
-      `\n` +
-      `*User Name :* ` +
-      name +
-      `\n` +
-      `*Login Password :* ` +
-      todayLogin +
-      `\n` +
-      `*Exit Password :* ` +
-      todayExit +
-      `\n\n` +
-      `*Tomorrow :* ` +
-      getNextDay(date)?.toLocaleDateString() +
-      `\n` +
-      `*User Name :* ` +
-      name +
-      `\n` +
-      `*Login Password :* ` +
-      tomorrowLogin +
-      `\n` +
-      `*Exit Password :* ` +
-      tomorrowExit +
-      ``;
+      `*Today :* `+new Date(date)?.toLocaleDateString()+`\n` +
+      `*User Name :* `+name+`\n` +
+      `*Login Password :* `+todayLogin+`\n` +
+      `*Exit Password :* `+todayExit+`\n\n` +
+      `*Tomorrow :* `+getNextDay(date)?.toLocaleDateString()+`\n` +
+      `*User Name :* `+name+`\n` +
+      `*Login Password :* `+tomorrowLogin+`\n` +
+      `*Exit Password :* `+tomorrowExit+``;
+    const phoneNumber = "918511063757"; // Replace with the recipient's phone number
 
-    let url = "whatsapp://send?text=" + message;
+    let url = "whatsapp://send?text=" + message + "&phone=" + phoneNumber;
     Linking.openURL(url)
       .then((data) => {
-        console.log("WhatsApp Opened");
+        //console.log("WhatsApp Opened");
       })
       .catch(() => {
         alert("Make sure Whatsapp installed on your device");
       });
   };
-
-  const copyPass = () => {
-    //console.log("share my password");
-    const message =
-      `*SPAN - Daily Password*\n\n` +
-      `*Today :* ` +
-      new Date(date)?.toLocaleDateString() +
-      `\n` +
-      `*User Name :* ` +
-      name +
-      `\n` +
-      `*Login Password :* ` +
-      todayLogin +
-      `\n` +
-      `*Exit Password :* ` +
-      todayExit +
-      `\n\n` +
-      `*Tomorrow :* ` +
-      getNextDay(date)?.toLocaleDateString() +
-      `\n` +
-      `*User Name :* ` +
-      name +
-      `\n` +
-      `*Login Password :* ` +
-      tomorrowLogin +
-      `\n` +
-      `*Exit Password :* ` +
-      tomorrowExit +
-      ``;
-
-    Clipboard.setString(message);
-    ToastAndroid.showWithGravity(
-      "Password details have been copied!",
-      ToastAndroid.SHORT,
-      ToastAndroid.BOTTOM
-    );
-    // Alert.alert("Copied to Clipboard", "Password details have been copied!");
-  };
-
   const getProductList = async () => {
-    setInvoiceData([])
     const token = await getUserToken();
     const userData = await getUserData();
     const dObject = {
       authorization: token,
       input: {
         id: userData?.id,
-        type: userData?.data.user_type,
       },
     };
     const encodedData = btoa(JSON.stringify(dObject));
     const finalData = { data: encodedData };
-
+    //console.log("finalData", finalData);
     const response = await fetch(
       "https://hum.ujn.mybluehostin.me/span/v1/master.php",
       {
@@ -223,15 +204,10 @@ export const HomeView = () => {
     );
     const result = await response.json();
 
-    // console.log("my data --------", result.data.latest_products);
-    setName(result.data.data.username);
-
-    setNote(result.data.message);
-
     const invoiceData = result.data?.latest_products?.map(
       (product: MachineRecord) => {
-        const inid = product.invoice_number.split(" ");
-        const invoice = inid[0];
+    const inid = product.invoice_number.split(" ");
+    const invoice = inid[0]
         return {
           key: product.id,
           colors:
@@ -240,7 +216,9 @@ export const HomeView = () => {
               : ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
           borderColor: "#BEC3CC",
           statusColor:
-            product.status == 1 ? GlobalAppColor.GREEN : GlobalAppColor.APPRED,
+            product.status == 1
+              ? GlobalAppColor.GREEN
+              : GlobalAppColor.APPRED,
           companyName: product.company_name,
           location: `(${product.location})`,
           status: product.status == 1 ? "Approved" : "Pending",
@@ -250,21 +228,16 @@ export const HomeView = () => {
         };
       }
     );
-
+    
     if (invoiceData) {
       setInvoiceData(invoiceData);
     }
   };
 
-  // useEffect(() => {
-  //   getProductList();
-  // }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      getProductList();
-    }, [])
-  );
+  useEffect(() => {
+    userData();
+    getProductList();
+  }, []);
 
   return (
     <>
@@ -272,9 +245,6 @@ export const HomeView = () => {
         style={HomeStyle.scrollViewStyle}
         contentContainerStyle={{ paddingBottom: 60 }}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
       >
         <View style={HomeStyle.greetingsParent}>
           <Text
@@ -316,9 +286,8 @@ export const HomeView = () => {
             >
               Daily Password
             </Text>
-
             <MaterialIcons
-              name="share"
+              name="open-in-new"
               size={24}
               color="black"
               style={{ opacity: 0.2 }}
@@ -338,7 +307,7 @@ export const HomeView = () => {
               label={"Today"}
               value={new Date(date)?.toLocaleDateString()}
             />
-            <DetailItem label={"User Name"} value={name} />
+            <DetailItem label={"User Name"} value={"Dummy123"} />
             <DetailItem label={"Login Password"} value={todayLogin} />
             <DetailItem label={"Exit Password"} value={todayExit} />
           </View>
@@ -351,34 +320,13 @@ export const HomeView = () => {
             }}
           ></View>
           <View style={{ marginTop: 15 }}>
-            <View style={{ display: "flex", flexDirection: "row" }}>
-              <View style={{ flex: 10 }}>
-                <DetailItem
-                  label={"Tomorrow"}
-                  value={getNextDay(date)?.toLocaleDateString()}
-                />
-                <DetailItem label={"User Name"} value={name} />
-                <DetailItem label={"Login Password"} value={tomorrowLogin} />
-                <DetailItem label={"Exit Password"} value={tomorrowExit} />
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                }}
-              >
-                <MaterialIcons
-                  name="content-copy"
-                  size={24}
-                  color="black"
-                  style={{
-                    opacity: 0.2,
-                  }}
-                  onPress={() => copyPass()}
-                />
-              </View>
-            </View>
+            <DetailItem
+              label={"Tomorrow"}
+              value={getNextDay(date)?.toLocaleDateString()}
+            />
+            <DetailItem label={"User Name"} value={name} />
+            <DetailItem label={"Login Password"} value={tomorrowLogin} />
+            <DetailItem label={"Exit Password"} value={tomorrowExit} />
           </View>
         </View>
 
@@ -391,27 +339,25 @@ export const HomeView = () => {
             estimatedItemSize={100}
             ListFooterComponent={() => {
               return (
-                invoiceData.length > 3 && (
-                  <Text
-                    onPress={() => {
-                      navigate(RouteNames.License);
-                    }}
-                    style={[
-                      GlobalStyle.TextStyle700_20_25,
-                      {
-                        display: "flex",
-                        alignContent: "center",
-                        alignItems: "center",
-                        alignSelf: "center",
-                        textDecorationStyle: "solid",
-                        textDecorationLine: "underline",
-                        marginTop: 28,
-                      },
-                    ]}
-                  >
-                    View More
-                  </Text>
-                )
+                <Text
+                  onPress={() => {
+                    navigate(RouteNames.License);
+                  }}
+                  style={[
+                    GlobalStyle.TextStyle700_20_25,
+                    {
+                      display: "flex",
+                      alignContent: "center",
+                      alignItems: "center",
+                      alignSelf: "center",
+                      textDecorationStyle: "solid",
+                      textDecorationLine: "underline",
+                      marginTop: 28,
+                    },
+                  ]}
+                >
+                  View More
+                </Text>
               );
             }}
           />

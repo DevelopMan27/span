@@ -109,7 +109,7 @@ const InvoiceItem = ({
                 color: statusColor,
               }}
             >
-              {status ? status : "no data"}
+              {status}
             </Text>
           </View>
         </View>
@@ -123,7 +123,7 @@ const InvoiceItem = ({
             }}
             numberOfLines={2}
           >
-            Invoice No: {invoiceNo ? invoiceNo : "1234"}
+            Invoice No: {invoiceNo}
           </Text>
           <Text
             style={{

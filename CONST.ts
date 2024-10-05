@@ -17,7 +17,6 @@ export const GlobalAppColor = {
   GREY: "#928FA6",
   InputBackGround: "#D8E0EC",
   InputBorder: "#D0D5DD",
-
 };
 
 export const GlobalFont = {

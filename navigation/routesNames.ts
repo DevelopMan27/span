@@ -6,7 +6,6 @@ export enum RouteNames {
   Login = "Login",
   Register = "Register",
   OTP = "OTP",
-  Announcement = "Announcement",
   LicenseDetails = "LicenseDetails",
   NotificationList = "NotificationList",
   License = "License",

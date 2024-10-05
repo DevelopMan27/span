@@ -1,5 +1,0 @@
-/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/armeabi-v7a/CMakeFiles/MyNativeModule.dir
-/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/armeabi-v7a/CMakeFiles/edit_cache.dir
-/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/armeabi-v7a/CMakeFiles/rebuild_cache.dir
-/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/armeabi-v7a/_deps/json-build/CMakeFiles/edit_cache.dir
-/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/armeabi-v7a/_deps/json-build/CMakeFiles/rebuild_cache.dir

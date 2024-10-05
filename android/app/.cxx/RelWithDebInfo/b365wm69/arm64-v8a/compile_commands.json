@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a",
-  "command": "/Users/apple/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android23 --sysroot=/Users/apple/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -DMyNativeModule_EXPORTS -I\"/Users/apple/Downloads/spanguruReactMansi-main done/android/app/src/main/cpp\" -I\"/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/RelWithDebInfo/b365wm69/arm64-v8a/_deps/json-src/include\" -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O2 -g -DNDEBUG -fPIC -std=gnu++17 -o CMakeFiles/MyNativeModule.dir/MyNativeModule.cpp.o -c \"/Users/apple/Downloads/spanguruReactMansi-main done/android/app/src/main/cpp/MyNativeModule.cpp\"",
-  "file": "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/src/main/cpp/MyNativeModule.cpp"
-}
-]

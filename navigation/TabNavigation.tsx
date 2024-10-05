@@ -30,14 +30,13 @@ const TabNavigation = () => {
           fontSize: 14,
           fontWeight: "600",
           fontFamily: GlobalFont.OpenSans_600SemiBold,
-          alignItems:"center",
-          marginBottom:12
+          alignItems:"center"
         },
         tabBarStyle: {
           backgroundColor: GlobalAppColor.Blue,
           borderTopEndRadius: 24,
           borderTopStartRadius: 24,
-          height: 90,
+          height: 70,
         },
       }}
       initialRouteName={RouteNames.HomeScreen}
@@ -58,7 +57,7 @@ const TabNavigation = () => {
             return (
               <AntDesign
                 name="home"
-                size={30}
+                size={25}
                 color={
                   props.focused
                     ? GlobalAppColor.White
@@ -148,7 +147,7 @@ const TabNavigation = () => {
             return (
               <AntDesign
                 name="user"
-                size={30}
+                size={25}
                 color={
                   props.focused
                     ? GlobalAppColor.White

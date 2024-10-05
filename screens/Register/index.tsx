@@ -26,11 +26,11 @@ import { RegistrationConfirmation } from "../../components/RegistrationConfirmat
 
 export const Register = () => {
   const { navigate } = useNavigation();
-  const [confirm, setConfirm] =
-    useState<FirebaseAuthTypes.ConfirmationResult>();
+  const [confirm, setConfirm] = useState<
+    FirebaseAuthTypes.ConfirmationResult | undefined
+  >(undefined);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string()
@@ -40,19 +40,15 @@ export const Register = () => {
         "Please enter a valid email address."
       )
       .required("Email is required."),
-    mobile: Yup.string()
-      .required("Mobile number is required."),
-    name: Yup.string()
-      .required("Please enter name"),
-    designation: Yup.string()
-      .required("Please enter designation"),
+    mobile: Yup.string().required("Mobile number is required."),
+    name: Yup.string().required("Please enter name"),
+    designation: Yup.string().required("Please enter designation"),
   });
 
   async function signInWithPhoneNumber(phoneNumber: string) {
     const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
     setConfirm(confirmation);
   }
-
   const checkUserExists = async (mobile: any) => {
     try {
       // Prepare the request payload
@@ -66,6 +62,7 @@ export const Register = () => {
       // Encode the data if needed
       const encodedData = btoa(JSON.stringify(dObject));
       const finalData = { data: encodedData };
+
       // Send a request to check if the user exists
       const response = await fetch(
         "https://hum.ujn.mybluehostin.me/span/v1/registration.php", // Using the same registration endpoint
@@ -77,9 +74,11 @@ export const Register = () => {
           body: JSON.stringify(finalData), // Send the correct payload
         }
       );
+
       // Parse the response
       const result = await response.json();
       //console.log("result", result);
+
       // Check if the response contains "Mobile number already exists"
       if (result.message === "Mobile number already exists") {
         return true; // User exists
@@ -92,7 +91,6 @@ export const Register = () => {
     }
   };
   const { token: ExpoToken } = useNotificationToken();
-
   const login = async (value: {
     email: string;
     mobile: string;
@@ -100,7 +98,6 @@ export const Register = () => {
     designation: string;
   }) => {
     //console.log("VVVV", value);
-
     // Create the registration data object
     // const token = "";
     // const dObject = {
@@ -116,7 +113,6 @@ export const Register = () => {
     // const encodedData = btoa(JSON.stringify(dObject));
     // const finalData = { data: encodedData };
     // //console.log("====finalData====", finalData);
-
     // Send the POST request to the registration endpoint
     // const response = await fetch(
     //   "https://hum.ujn.mybluehostin.me/span/v1/registration.php",
@@ -128,10 +124,8 @@ export const Register = () => {
     //     body: JSON.stringify(finalData),
     //   }
     // );
-
     // const result = await response.json();
     // //console.log("result", result);
-
     // if (result.success) {
     //   Alert.alert("Registration Successful", `User ID: ${result.data}`);
     // } else {
@@ -144,7 +138,6 @@ export const Register = () => {
     }
     return number;
   }
-
   const registerUser = async ({
     mobile,
     name,
@@ -173,6 +166,7 @@ export const Register = () => {
     console.log("dObject", dObject);
     const encodedData = btoa(JSON.stringify(dObject));
     const finalData = { data: encodedData };
+
     try {
       const response = await fetch(
         "https://hum.ujn.mybluehostin.me/span/v1/registration.php",
@@ -194,7 +188,6 @@ export const Register = () => {
       };
     }
   };
-
   const formik = useFormik({
     validationSchema: LoginSchema,
     initialValues: {
@@ -214,6 +207,7 @@ export const Register = () => {
       setLoading(true);
       const updatedNumber = addCountryCode(values.mobile);
       formik.setFieldValue("mobile", updatedNumber);
+      // const mobilenum = removeCountryCode(mobile);
       // await signInWithPhoneNumber(updatedNumber);
       const registrationResult = await registerUser({
         mobile: formik.values.mobile,
@@ -315,7 +309,7 @@ export const Register = () => {
                   borderRadius: 8,
                   backgroundColor: GlobalAppColor.AppWhite,
                 }}
-                maxLength={13}
+                maxLength={10}
                 value={formik.values.mobile}
                 onChangeText={(text) => {
                   formik.setFieldValue("mobile", text);
@@ -339,7 +333,6 @@ export const Register = () => {
                 }}
                 value={formik.values.email}
                 onChangeText={(text) => {
-                  
                   formik.setFieldValue("email", text);
                 }}
               />

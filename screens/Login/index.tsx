@@ -26,14 +26,20 @@ import debounce from "lodash.debounce";
 
 export const Login = () => {
   const { navigate } = useNavigation();
-  const [confirm, setConfirm] =
-    useState<FirebaseAuthTypes.ConfirmationResult>();
+  const [confirm, setConfirm] = useState<
+    FirebaseAuthTypes.ConfirmationResult | undefined
+  >(undefined);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const debouncedSubmit = debounce(() => {
+  const debouncedSubmit = () => {
+    setLoading(true);
+    loginUser();
+  };
+
+  const loginUser = debounce(() => {
     formik.handleSubmit();
-  }, 0); // 1000ms debounce
+  }, 1000); // 1000ms debounce
 
   async function confirmCode(code) {
     try {
@@ -47,8 +53,10 @@ export const Login = () => {
   const signInWithPhoneNumber = async (phoneNumber) => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      console.log("==========");
       setConfirm(confirmation);
     } catch (error) {
+      console.log("Errorrrr", error);
       Alert.alert("Error", JSON.stringify(error));
       //console.log("Error", error);
     }
@@ -60,7 +68,7 @@ export const Login = () => {
   });
   function addCountryCode(number) {
     if (!number.startsWith("+91")) {
-      return "+91" + number;
+      return number;
     }
     return number;
   }
@@ -71,35 +79,24 @@ export const Login = () => {
       otp: 0,
     },
     onSubmit: async (values) => {
-      const ll = values.mobile.length;
-      if (ll != 10) {
-        Alert.alert("Invalid", "Please enter valid mobile number");
-      } else {
-        setLoading(true);
+      setLoading(true);
 
+      const updatedNumber = addCountryCode(values.mobile);
+      // checkUser(values.mobile);
+      const user = await checkUser(removeCountryCode(values.mobile));
+      console.log("user", user.success);
+      if (user.success) {
+        // console.log("done")
         const updatedNumber = addCountryCode(values.mobile);
-        // checkUser(updatedNumber)
-        // const user = checkUser(updatedNumber);
-
-        const user = await checkUser(removeCountryCode(values.mobile));
-
-        // navigate(RouteNames.OTP, {
-        //   confirm: "",
-        //   mobile: formik.values.mobile,
-        // });
-        if (user) {
-          console.log("done")
-          const updatedNumber = addCountryCode(values.mobile);
-          // formik.setFieldValue("mobile", updatedNumber);
-          signInWithPhoneNumber(updatedNumber);
-          setLoading(false);
-        } else {
-          console.log(user);
-        }
+        // formik.setFieldValue("mobile", updatedNumber);
+        signInWithPhoneNumber(updatedNumber);
+        setLoading(false);
+      } else {
+        console.log(user);
+        setLoading(false);
       }
     },
   });
-
   function removeCountryCode(mobileNumber: any) {
     // Remove any leading +91 or 91
     mobileNumber = mobileNumber.replace(/^(\+91|91)/, "");
@@ -107,7 +104,6 @@ export const Login = () => {
     mobileNumber = mobileNumber.trim();
     return mobileNumber;
   }
-
   const checkUser = async (mobile) => {
     const token = "";
     const dObject = {
@@ -130,14 +126,15 @@ export const Login = () => {
         }
       );
       const result = await response.json();
-      // console.log(result);
+      console.log(result);
+      console.log(`result.success == false`, result.success == false);
 
       if (result.success == false) {
-        Alert.alert("User Not Found", result.message);
+        // Alert.alert("User Not Found", result.message);
         setLoading(false);
+        return { success: false, message: result.message };
       } else {
-        // console.log
-        return true;
+        return { success: true, message: "DONE" };
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -219,7 +216,6 @@ export const Login = () => {
                   backgroundColor: GlobalAppColor.AppWhite,
                 }}
                 value={formik.values.mobile}
-                maxLength={10}
                 onChangeText={(text) => {
                   formik.setFieldValue("mobile", text);
                 }}

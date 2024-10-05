@@ -16,12 +16,10 @@ import React, { useEffect, useState } from "react";
 import {
   formatDateForProductDetails,
   getData,
-  getUserData,
   getUserToken,
 } from "../../utils";
 import { btoa } from "react-native-quick-base64";
 import CameraDetails from "./CameraDetails";
-import { bool } from "yup";
 
 type LicenseDetailsProps = RouteProp<
   RootStackParamList,
@@ -38,12 +36,7 @@ export const LicenseDetails = () => {
     ProductInfoType | undefined
   >(undefined);
 
-  const [userData, setUserData] = useState("");
   const getProductDetails = async (id: string) => {
-    const udata = await getUserData();
-
-    setUserData(udata?.data);
-    console.log(userData);
     const token = await getUserToken();
     const dObject = {
       authorization: token,
@@ -70,7 +63,7 @@ export const LicenseDetails = () => {
   };
 
   const abc = productDetails?.basicInfo.io_service_number.split("\n");
-  // console.log(abc);
+  console.log(abc);
   const inid = productDetails?.basicInfo.invoice_number.split(" ");
   const invoice = inid ? inid[0] : null;
   useEffect(() => {
@@ -96,6 +89,49 @@ export const LicenseDetails = () => {
       </View>
     );
   }
+  const sendNotification = async (
+    expoToken: string,
+    title: string,
+    message: string,
+    id: String
+  ) => {
+    try {
+      const token = await getUserToken();
+      //console.log("token=========>", token);
+      //console.log("expoToken====>", expoToken);
+      const dObject = {
+        to: expoToken,
+        title: title,
+        body: message,
+        screen: "LicenseDetails",
+      };
+
+      //console.log("dObject====>", dObject);
+
+      const encodedData = btoa(JSON.stringify(dObject));
+      // const finalData = { data: dObject };
+      //console.log("finalData_________________notification", encodedData);
+      //console.log("expoToken", expoToken);
+      const response = await fetch(
+        "https://hum.ujn.mybluehostin.me/span/v1/push_notification.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dObject),
+        }
+      );
+      const result = await response.json();
+      //console.log("notification_send_result", result);
+    } catch (error) {
+      console.error("Error Sending notification:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("loading   ", loading);
 
   const getUserDetails = async (id: string) => {
     try {
@@ -125,13 +161,15 @@ export const LicenseDetails = () => {
       );
 
       const result = await response.json();
-      console.log("result======>", result);
+      //console.log("result======>", result);
     } catch (error) {
       Alert.alert("Error", error.message);
     }
   };
 
   const generateLicenseKey = async (action) => {
+    console.log(action);
+
     try {
       const tokens = await getUserToken();
       const dObject = {
@@ -156,38 +194,34 @@ export const LicenseDetails = () => {
       );
 
       const result = await response.json();
-      // const ab = JSON.parse(result);
-      console.log("after approve and reject", result);
-      if (result.data === true) {
-        const token = await getData("EXPO_TOKEN");
+      const token = await getData("EXPO_TOKEN");
 
-        getUserDetails(productDetails?.basicInfo?.engineer_id);
-        if (action == 1) {
-          Alert.alert("Approved", "Product approved successfully..");
-        } else {
-          Alert.alert("Rejected", "Product rejected successfully..");
-        }
-        const engineerName =
-          productDetails?.basicInfo?.engineer_name || "Engineer";
-        if (token && productDetails?.basicInfo?.company_name && engineerName) {
-          let msg = "";
-          if (action == 1) {
-            msg = "Product approved successfully.";
-          } else {
-            msg = "Product rejected successfully.";
-          }
-          sendNotification(
-            token,
-            productDetails?.basicInfo?.company_name,
-            msg,
-            productDetails?.basicInfo?.id
-          );
-        }
+      getUserDetails(productDetails?.basicInfo?.engineer_id);
+      if (action == 1) {
+        Alert.alert("Approved", "Product approved successfully..");
+      } else {
+        Alert.alert("Rejected", "Product rejected successfully..");
       }
-      // console.log("result======>", result);
+      const engineerName =
+        productDetails?.basicInfo?.engineer_name || "Engineer";
+      if (token && productDetails?.basicInfo?.company_name && engineerName) {
+        let msg = "";
+        if (action == 1) {
+          msg = "Product approved successfully.";
+        } else {
+          msg = "Product rejected successfully.";
+        }
+        sendNotification(
+          token,
+          productDetails?.basicInfo?.company_name,
+          msg,
+          productDetails?.basicInfo?.id
+        );
+        
+      }
+      //console.log("result======>", result);
     } catch (error) {
-      console.log(error);
-      console.log("fail");
+      Alert.alert("Error", error.message);
     }
   };
 
@@ -223,13 +257,7 @@ export const LicenseDetails = () => {
         <Text
           style={[
             GlobalStyle.TextStyle500_25_16,
-            {
-              fontSize: 16,
-              lineHeight: 25,
-              color: "#00000080",
-              flex: 1,
-              textAlign: "right",
-            },
+            { fontSize: 16, lineHeight: 25, color: "#00000080" },
           ]}
         >
           PO # {productDetails?.basicInfo.purchase_number}
@@ -330,65 +358,6 @@ export const LicenseDetails = () => {
           >
             {productDetails?.basicInfo?.model_number}
           </Text>
-        </View>
-        <View style={{ marginTop: 11 }}></View>
-
-        <View
-          style={{
-            borderWidth: 1.5,
-            borderColor: "#000000CC",
-            opacity: 0.1,
-          }}
-        ></View>
-        <View style={{ marginTop: 11 }}></View>
-
-        <Text
-          style={[
-            GlobalStyle.TextStyle500_25_16,
-            { fontSize: 16, lineHeight: 25 },
-          ]}
-        >
-          Product Info :
-        </Text>
-        <View style={{ marginLeft: 25 }}>
-          {productDetails?.categoryDetails?.map((category, cIndex) => (
-            <View key={cIndex}>
-              <View style={{ display: "flex", columnGap: 3 }}>
-                <Text
-                  style={{ fontWeight: "normal", fontSize: 16, lineHeight: 25 }}
-                >
-                  {category.category_name}
-                </Text>
-                <View>
-                  {JSON.parse(category.sub_category)?.map(
-                    (subCategory, sIndex) => (
-                      <View
-                        key={sIndex}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginLeft: 14,
-                        }}
-                      >
-                        <Text
-                          style={{ fontSize: 19, color: "#000000CC" }}
-                        >{`\u2022`}</Text>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            marginLeft: 5,
-                            color: "#000000CC",
-                          }}
-                        >
-                          {subCategory.sub_category_name}
-                        </Text>
-                      </View>
-                    )
-                  )}
-                </View>
-              </View>
-            </View>
-          ))}
         </View>
       </View>
       <View style={{ marginTop: 11 }}></View>
@@ -612,70 +581,80 @@ export const LicenseDetails = () => {
         }}
       ></View>
       <View style={{ marginTop: 15 }}></View>
-
-      {/* {console.log("status===============>", productDetails?.basicInfo?.status)} */}
+      {/* {productDetails?.basicInfo?.status === 0 ? (
+        <>
+          <Text style={[GlobalStyle.TextStyle500_25_16]}>Licence Key :</Text>
+          <Text
+            style={[
+              GlobalStyle.TextStyle500_25_16,
+              {
+                fontSize: 18,
+                lineHeight: 25,
+                letterSpacing: 0.1,
+                shadowColor: "#000",
+                shadowOffset: { width: 4, height: 4 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+              },
+            ]}
+          >
+            {productDetails?.basicInfo?.key}
+          </Text>
+        </>
+      ) : (
+        ""
+      )} */}
+      {console.log("status===============>", productDetails?.basicInfo?.status)}
       {productDetails?.basicInfo?.status == 0 ? (
         <>
-          {(productDetails?.basicInfo?.in_house_flag == 1 &&
-            userData.user_type == 2) ||
-            (userData.user_type == 3 && (
-              <>
-                <Pressable
-                  onPress={() => generateLicenseKey(1)}
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    height: 50,
-                    backgroundColor: GlobalAppColor.AppBlue,
-                    borderRadius: 24,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#ffffff" />
-                  ) : (
-                    <Text
-                      style={[
-                        GlobalStyle.TextStyle500_25_16,
-                        { color: "#ffffff" },
-                      ]}
-                    >
-                      Approve
-                    </Text>
-                  )}
-                </Pressable>
-                <Pressable
-                  onPress={() => generateLicenseKey(2)}
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    height: 50,
-                    backgroundColor: GlobalAppColor.AppBlue,
-                    borderRadius: 24,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#ffffff" />
-                  ) : (
-                    <Text
-                      style={[
-                        GlobalStyle.TextStyle500_25_16,
-                        { color: "#ffffff" },
-                      ]}
-                    >
-                      Reject
-                    </Text>
-                  )}
-                </Pressable>
-              </>
-            ))}
+          <Pressable
+            onPress={() => generateLicenseKey(1)}
+            disabled={loading}
+            style={{
+              width: "100%",
+              height: 50,
+              backgroundColor: GlobalAppColor.AppBlue,
+              borderRadius: 24,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 10,
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text
+                style={[GlobalStyle.TextStyle500_25_16, { color: "#ffffff" }]}
+              >
+                Approve
+              </Text>
+            )}
+          </Pressable>
+          <Pressable
+            onPress={() => generateLicenseKey(2)}
+            disabled={loading}
+            style={{
+              width: "100%",
+              height: 50,
+              backgroundColor: GlobalAppColor.AppBlue,
+              borderRadius: 24,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 10,
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text
+                style={[GlobalStyle.TextStyle500_25_16, { color: "#ffffff" }]}
+              >
+                Reject
+              </Text>
+            )}
+          </Pressable>
         </>
       ) : (
         <View

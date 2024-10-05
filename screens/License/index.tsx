@@ -1,7 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Modal,
   Pressable,
@@ -26,8 +25,6 @@ import {
 import { MachineRecord } from "../../type";
 import { btoa, atob } from "react-native-quick-base64";
 import { CheckBox } from "react-native-elements";
-import { limit } from "@react-native-firebase/firestore";
-import { useFocusEffect } from "@react-navigation/native";
 
 export const License = () => {
   const [invoiceData, setInvoiceData] = useState([]);
@@ -36,7 +33,6 @@ export const License = () => {
   const [filteredData, setFilteredData] = useState(invoiceData);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selected, setSelected] = React.useState("");
-  const [loading, setLoading] = useState(false);
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
@@ -50,6 +46,8 @@ export const License = () => {
 
   const fetchLicenses = async (searchText: string) => {
     try {
+      //console.log("searched text===>", searchText);
+
       const token = await getUserToken();
       const user = await getUserData();
 
@@ -57,38 +55,25 @@ export const License = () => {
         throw new Error("User token or user data is missing.");
       }
 
-      let tabid = 0;
-      let inHouse = 0;
-      let approved = 0;
-
-      if (inHouse === 1 && approved === 1) {
-        tabid = 2;
-      } else if (inHouse === 0 && approved === 1) {
-        tabid = 1;
-      } else if (approved === 0) {
-        tabid = 0;
-      }
-
       const dObject = {
         authorization: token,
         input: {
-          tab_id: tabid, 
+          tab_id: "",
+          offset: "0",
+          limit: "10",
           uid: user?.data.user_id,
-          utype: user?.data.user_type,
-          text: searchText || "",
-          limit: 10,
-          offset: 0,
-          filter: [
-            "invoice_number",
-            "model_number",
-            "company_name",
-            "camera_serial_number",
-          ],
-          startdate:"2024-09-24",
-          enddate:"2024-10-28",
+          utype: 2,
+          text: searchText ?? "m",
+          filter: [""],
         },
       };
+
+      //console.log("usertype",user?.data.user_type)
+      //console.log("user",user?.data.user_id)
+
       const encodedData = btoa(JSON.stringify(dObject));
+      //console.log("encoded data====>", encodedData);
+
       const finalData = { data: encodedData };
 
       const response = await fetch(
@@ -102,82 +87,74 @@ export const License = () => {
         }
       );
 
-      const result = await response.json();
-      // console.log(result);
-      console.log("data length--", result.sql);
-      console.log("data length--", result.data.length);
-      if (!result.data || result.data.length === 0) {
-        setInvoiceData([]); 
+      //console.log("response status---->", response.status);
+      //console.log("response headers---->", response.headers);
+
+      // Log the response as text
+      let responseText = await response.text();
+      //console.log("Raw Response Text:", responseText);
+
+      // Remove any extraneous content by extracting only the JSON part
+      const jsonResponseStart = responseText.indexOf("{");
+      const jsonResponseEnd = responseText.lastIndexOf("}") + 1;
+      responseText = responseText.substring(jsonResponseStart, jsonResponseEnd);
+
+      try {
+        const result = JSON.parse(responseText);
+        //console.log("Parsed API Response:", result);
+
+        if (!result.data) {
+          throw new Error("No data found in the response.");
+        }
+
+        const invoiceData = result.data.map((product: MachineRecord) => {
+          return {
+            key: product.id,
+            colors:
+              product.status == "0"
+                ? ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"]
+                : ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
+            borderColor: "#BEC3CC",
+            statusColor: GlobalAppColor.APPRED,
+            companyName: product.company_name,
+            location: `(${product.location})`,
+            status: product.status == "1" ? "Approved" : "Pending",
+            invoiceNo: product.invoice_number,
+            date: convertDateFormat(product.created_on),
+            id: product.id,
+          };
+        });
+
+        if (invoiceData.length > 0) {
+          setInvoiceData(invoiceData);
+        } else {
+          console.warn("No invoice data available.");
+        }
+      } catch (jsonError) {
+        console.error("Failed to parse JSON response:", jsonError);
       }
-
-      // Process invoice data
-      const invoiceData = result.data.map((product: any) => ({
-        key: product.id,
-        colors:
-          product.status === "1"
-            ? ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"]
-            : ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
-        borderColor: "#BEC3CC",
-        statusColor:
-          product.status === "1" ? GlobalAppColor.GREEN : GlobalAppColor.APPRED,
-        companyName: product.company_name,
-        location: `(${product.location})`,
-        status: product.status === "1" ? "Approved" : "Pending",
-        invoiceNo: product.invoice_number,
-        date: convertDateFormat(product.created_on),
-        id: product.id,
-      }));
-
-      setInvoiceData(invoiceData);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
+      console.error("Error fetching licenses:", error.message);
     }
   };
 
-  // useEffect(() => {
-  //   setFilteredData(
-  //     invoiceData?.filter(
-  //       (item) =>
-  //         item?.companyName
-  //           ?.toLowerCase()
-  //           ?.includes(searchText.toLowerCase()) ||
-  //         item?.invoiceNo?.toLowerCase()?.includes(searchText.toLowerCase()) ||
-  //         item?.location?.toLowerCase()?.includes(searchText.toLowerCase()) ||
-  //         item?.status?.toLowerCase()?.includes(searchText.toLowerCase())
-  //     )
-  //   );
-  // }, [searchText, invoiceData]);
-
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
-
-      fetchLicensesDebounced(searchText);
-      console.log("loading", loading);
-    },[searchText, fetchLicensesDebounced])
-  )
-  // useEffect(() => {
-    
-  // }, []);
-
-  if (loading) {
-    return (
-      <View
-        style={{
-          display: "flex",
-          alignContent: "center",
-          alignItems: "center",
-          alignSelf: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          flex: 1,
-        }}
-      >
-        <ActivityIndicator color={GlobalAppColor.AppBlue} size={"large"} />
-      </View>
+  useEffect(() => {
+    setFilteredData(
+      invoiceData?.filter(
+        (item) =>
+          item?.companyName
+            ?.toLowerCase()
+            ?.includes(searchText.toLowerCase()) ||
+          item?.invoiceNo?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+          item?.location?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+          item?.status?.toLowerCase()?.includes(searchText.toLowerCase())
+      )
     );
-  }
+  }, [searchText, invoiceData]);
+
+  useEffect(() => {
+    fetchLicensesDebounced(searchText);
+  }, [searchText, fetchLicensesDebounced]);
 
   return (
     <SafeAreaView style={{ display: "flex", flex: 1, flexDirection: "column" }}>
@@ -200,7 +177,7 @@ export const License = () => {
           }}
           placeholder="Search..."
           onChangeText={(text) => {
-            fetchLicenses(text);
+            setSearchText(text);
           }}
         />
         <Pressable
@@ -232,21 +209,20 @@ export const License = () => {
           flex: 1,
         }}
       >
+        {isModalVisible && <Text style={{margin:25}}>Filters</Text>}
 
-        {invoiceData.length === 0 ? (
+        {filteredData.length === 0 ? (
           <View style={styles.noDataView}>
             <Text style={styles.noDataText}>No data available.</Text>
           </View>
         ) : (
-          <>
           <FlashList
-            data={invoiceData}
+            data={filteredData}
             renderItem={RenderInvoiceItem}
             keyExtractor={(item) => item.key}
             ItemSeparatorComponent={SeparatorComponent}
             estimatedItemSize={100}
           />
-          </>
         )}
       </View>
     </SafeAreaView>
