@@ -1,53 +1,110 @@
 import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
-  Modal,
   Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
-import { HomeStyle } from "../Home/style";
 import { GlobalAppColor } from "../../CONST";
 import { RenderInvoiceItem } from "../Home/components/HomeView/RenderInvoiceItem";
 import { CustomTextInput } from "../../components/CustomTextInput";
-import { Fontisto } from "@expo/vector-icons";
-import { useSafeAreaFrame } from "react-native-safe-area-context";
 import {
   convertDateFormat,
   debounce,
   getUserData,
   getUserToken,
 } from "../../utils";
-import { MachineRecord } from "../../type";
-import { btoa, atob } from "react-native-quick-base64";
-import { CheckBox } from "react-native-elements";
+import { useFocusEffect } from "@react-navigation/native";
+import { FilterModal } from "../../components/FilterModal";
+import { btoa } from "react-native-quick-base64";
+import { AppliedFilters } from "../../components/FilterModal/AppliedFilters";
 
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+const getDate = (addDays = 0) => {
+  const date = new Date();
+  date.setDate(date.getDate() + addDays);
+  return date.toISOString().split("T")[0];
+};
 export const License = () => {
   const [invoiceData, setInvoiceData] = useState([]);
-
   const [searchText, setSearchText] = useState("");
-  const [filteredData, setFilteredData] = useState(invoiceData);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [selected, setSelected] = React.useState("");
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
+  const [loading, setLoading] = useState(false);
+  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    tabId: 0,
+    inHouse: 0,
+    approved: 0,
+    invoiceNumber: false,
+    modelNumber: false,
+    companyName: false,
+    cameraSerialNumber: false,
+    startDate: getTodayDate(),
+    endDate: getDate(30),
+  });
+
+  const toggleFilterModal = () => {
+    setFilterModalVisible(!isFilterModalVisible);
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      tabId: 0,
+      inHouse: 0,
+      approved: 0,
+      invoiceNumber: false,
+      modelNumber: false,
+      companyName: false,
+      cameraSerialNumber: false,
+      startDate: getTodayDate(),
+      endDate: getDate(30),
+    });
+    setSearchText("");
+    fetchLicenses(searchText, filters);
+  };
+
+  const applyFilter = (newFilters: any) => {
+    let tabid = 0;
+    let inHouse = newFilters.inHouse;
+    let approved = newFilters.approved;
+
+    if (inHouse === 1 && approved === 1) {
+      tabid = 2;
+    } else if (inHouse === 0 && approved === 1) {
+      tabid = 1;
+    } else if (approved === 0) {
+      tabid = 0;
+    }
+
+    const updatedFilters = {
+      ...newFilters,
+      tabId: tabid,
+    };
+
+    setFilters(updatedFilters);
+    fetchLicenses(searchText, updatedFilters);
   };
 
   const fetchLicensesDebounced = useCallback(
-    debounce((text: string) => {
-      fetchLicenses(text);
-    }, 5000),
+    debounce((text: string, filters: any) => {
+      fetchLicenses(text, filters);
+    }, 100),
     []
   );
-
-  const fetchLicenses = async (searchText: string) => {
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    fetchLicenses(text, filters);
+  };
+  const fetchLicenses = async (searchText: string, filters: any) => {
     try {
-      //console.log("searched text===>", searchText);
-
+      setLoading(true);
       const token = await getUserToken();
       const user = await getUserData();
 
@@ -55,25 +112,27 @@ export const License = () => {
         throw new Error("User token or user data is missing.");
       }
 
+      const filterArray = [];
+      if (filters.invoiceNumber) filterArray.push("invoice_number");
+      if (filters.modelNumber) filterArray.push("model_number");
+      if (filters.companyName) filterArray.push("company_name");
+      if (filters.cameraSerialNumber) filterArray.push("camera_serial_number");
+
       const dObject = {
         authorization: token,
         input: {
-          tab_id: "",
-          offset: "0",
-          limit: "10",
+          tab_id: filters.tabId,
           uid: user?.data.user_id,
-          utype: 2,
-          text: searchText ?? "m",
-          filter: [""],
+          utype: user?.data.user_type,
+          text: searchText || "",
+          limit: 10,
+          offset: 0,
+          filter: filterArray,
+          startdate: filters.startDate,
+          enddate: filters.endDate,
         },
       };
-
-      //console.log("usertype",user?.data.user_type)
-      //console.log("user",user?.data.user_id)
-
       const encodedData = btoa(JSON.stringify(dObject));
-      //console.log("encoded data====>", encodedData);
-
       const finalData = { data: encodedData };
 
       const response = await fetch(
@@ -87,137 +146,81 @@ export const License = () => {
         }
       );
 
-      //console.log("response status---->", response.status);
-      //console.log("response headers---->", response.headers);
-
-      // Log the response as text
-      let responseText = await response.text();
-      //console.log("Raw Response Text:", responseText);
-
-      // Remove any extraneous content by extracting only the JSON part
-      const jsonResponseStart = responseText.indexOf("{");
-      const jsonResponseEnd = responseText.lastIndexOf("}") + 1;
-      responseText = responseText.substring(jsonResponseStart, jsonResponseEnd);
-
-      try {
-        const result = JSON.parse(responseText);
-        //console.log("Parsed API Response:", result);
-
-        if (!result.data) {
-          throw new Error("No data found in the response.");
-        }
-
-        const invoiceData = result.data.map((product: MachineRecord) => {
-          return {
-            key: product.id,
-            colors:
-              product.status == "0"
-                ? ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"]
-                : ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
-            borderColor: "#BEC3CC",
-            statusColor: GlobalAppColor.APPRED,
-            companyName: product.company_name,
-            location: `(${product.location})`,
-            status: product.status == "1" ? "Approved" : "Pending",
-            invoiceNo: product.invoice_number,
-            date: convertDateFormat(product.created_on),
-            id: product.id,
-          };
-        });
-
-        if (invoiceData.length > 0) {
-          setInvoiceData(invoiceData);
-        } else {
-          console.warn("No invoice data available.");
-        }
-      } catch (jsonError) {
-        console.error("Failed to parse JSON response:", jsonError);
+      const result = await response.json();
+      console.log("data length--", result.sql);
+      console.log("data length--", result.data.length);
+      if (!result.data || result.data.length === 0) {
+        setInvoiceData([]);
+      } else {
+        const invoiceData = result.data.map((product: any) => ({
+          key: product.id,
+          colors:
+            product.status === "1"
+              ? ["rgba(0, 128, 0, 0.3)", "rgba(255, 255, 255, 0.3)"]
+              : ["rgba(10, 80, 156, 0.3)", "rgba(255, 255, 255, 0.3)"],
+          borderColor: "#BEC3CC",
+          statusColor:
+            product.status === "1"
+              ? GlobalAppColor.GREEN
+              : GlobalAppColor.APPRED,
+          companyName: product.company_name,
+          location: `(${product.location})`,
+          status: product.status === "1" ? "Approved" : "Pending",
+          invoiceNo: product.invoice_number,
+          date: convertDateFormat(product.created_on),
+          id: product.id,
+        }));
+        setInvoiceData(invoiceData);
       }
     } catch (error) {
-      console.error("Error fetching licenses:", error.message);
+      console.error("Error fetching licenses:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    setFilteredData(
-      invoiceData?.filter(
-        (item) =>
-          item?.companyName
-            ?.toLowerCase()
-            ?.includes(searchText.toLowerCase()) ||
-          item?.invoiceNo?.toLowerCase()?.includes(searchText.toLowerCase()) ||
-          item?.location?.toLowerCase()?.includes(searchText.toLowerCase()) ||
-          item?.status?.toLowerCase()?.includes(searchText.toLowerCase())
-      )
-    );
-  }, [searchText, invoiceData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchLicensesDebounced(searchText, filters);
+    }, [fetchLicensesDebounced])
+  );
 
-  useEffect(() => {
-    fetchLicensesDebounced(searchText);
-  }, [searchText, fetchLicensesDebounced]);
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator color={GlobalAppColor.AppBlue} size={"large"} />
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={{ display: "flex", flex: 1, flexDirection: "column" }}>
-      <View
-        style={{
-          marginHorizontal: 25,
-          marginTop: 28,
-          display: "flex",
-          flexDirection: "row",
-          alignContent: "center",
-          alignItems: "center",
-          columnGap: 8,
-        }}
-      >
+    <SafeAreaView style={styles.container}>
+      <View style={styles.searchContainer}>
         <CustomTextInput
           inputType="Text"
-          inputContainerStyle={{
-            backgroundColor: GlobalAppColor.AppWhite,
-            flex: 1,
-          }}
+          inputContainerStyle={styles.searchInput}
           placeholder="Search..."
-          onChangeText={(text) => {
-            setSearchText(text);
-          }}
+          onChangeText={setSearchText}
+          onSubmitEditing={() => handleSearch(searchText)}
+          returnKeyType="search"
+          value={searchText}
         />
-        <Pressable
-          onPress={toggleModal}
-          style={{
-            width: 42,
-            height: 42,
-            borderColor: "#BEC3CC",
-            borderWidth: 1,
-            display: "flex",
-            alignContent: "center",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 4,
-          }}
-        >
+        <Pressable onPress={toggleFilterModal} style={styles.filterButton}>
           <Image
             source={require("../../assets/filterIcon.png")}
-            style={{ width: 32, height: 32 }}
+            style={styles.filterIcon}
           />
         </Pressable>
       </View>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          rowGap: 31,
-          marginTop: 5,
-          flex: 1,
-        }}
-      >
-        {isModalVisible && <Text style={{margin:25}}>Filters</Text>}
-
-        {filteredData.length === 0 ? (
+      <AppliedFilters filters={filters} onClearAll={clearAllFilters} />
+      <View style={styles.listContainer}>
+        {invoiceData.length === 0 ? (
           <View style={styles.noDataView}>
             <Text style={styles.noDataText}>No data available.</Text>
           </View>
         ) : (
           <FlashList
-            data={filteredData}
+            data={invoiceData}
             renderItem={RenderInvoiceItem}
             keyExtractor={(item) => item.key}
             ItemSeparatorComponent={SeparatorComponent}
@@ -225,6 +228,12 @@ export const License = () => {
           />
         )}
       </View>
+      <FilterModal
+        modalVisible={isFilterModalVisible}
+        setModalVisible={setFilterModalVisible}
+        applyFilter={applyFilter}
+        initialFilters={filters}
+      />
     </SafeAreaView>
   );
 };
@@ -234,29 +243,40 @@ const SeparatorComponent = () => <View style={{ height: 20 }} />;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "column",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
     justifyContent: "center",
+  },
+  searchContainer: {
+    marginHorizontal: 25,
+    marginTop: 28,
+    flexDirection: "row",
     alignItems: "center",
+    columnGap: 8,
   },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 22,
-    borderRadius: 4,
-    borderColor: "rgba(0, 0, 0, 0.1)",
+  searchInput: {
+    backgroundColor: GlobalAppColor.AppWhite,
+    flex: 1,
   },
-  modalTitle: {
-    fontSize: 18,
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: "#2196F3",
-    padding: 10,
-    marginTop: 12,
-    borderRadius: 4,
+  filterButton: {
+    width: 42,
+    height: 42,
+    borderColor: "#BEC3CC",
+    borderWidth: 1,
     alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
   },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
+  filterIcon: {
+    width: 32,
+    height: 32,
+  },
+  listContainer: {
+    flex: 1,
+    marginTop: 5,
   },
   noDataView: {
     flex: 1,

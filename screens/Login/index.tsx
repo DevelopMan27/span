@@ -68,7 +68,7 @@ export const Login = () => {
   });
   function addCountryCode(number) {
     if (!number.startsWith("+91")) {
-      return number;
+      return "+91" + number;
     }
     return number;
   }
