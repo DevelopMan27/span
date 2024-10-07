@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  ToastAndroid,
   View,
 } from "react-native";
 import { GlobalAppColor, GlobalFont, GlobalStyle } from "../../CONST";
@@ -15,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import { PopUpModal } from "../../components/PopUp";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { DropdownComponent } from "../../components/Spinner";
 import { btoa } from "react-native-quick-base64";
 import {
@@ -27,7 +26,6 @@ import {
 } from "../../utils";
 import { CameraCompo } from "./camera";
 import Toast from "react-native-toast-message";
-import { RouteNames } from "../../navigation/routesNames";
 
 export const DeviceDetails = () => {
   const route = useRoute();
@@ -129,8 +127,6 @@ export const DeviceDetails = () => {
     },
   });
 
-  console.log("pindex", primaryInfo["PRODUCT NO"]);
-  console.log("type -----   ", QR_STSTEM_TYPE);
   // const createProduct = async () => {
   //   let productNoString = primaryInfo["PRODUCT NO"]; // The string
   //   let productNoArray = productNoString.split(",");
@@ -214,15 +210,14 @@ export const DeviceDetails = () => {
   //   }
   // };
 
-  const navigatation = useNavigation();
   const createProduct = async () => {
-    if (JSON.parse(QR_STSTEM_TYPE) == "In House") {
+    if (QR_STSTEM_TYPE == "In House") {
       setInhouse("1");
     } else {
       setInhouse("0");
     }
-    console.log(inhouse);
-    if (JSON.parse(QR_STSTEM_TYPE) != "In House") {
+    console.log(QR_STSTEM_TYPE)
+    if (QR_STSTEM_TYPE != "In House") {
       if (
         !invoice ||
         !hdd["validity"] ||
@@ -400,7 +395,7 @@ export const DeviceDetails = () => {
           "\n" +
           primaryInfo.MACHINE,
         lens_info: "",
-        setup_version: formik.values.setupversion, // Typo corrected
+        setup_version: formik.values.setupversion.toString(), // Typo corrected
         engineer_id: uid,
         qc_id: QR_STSTEM_ADMIN,
         remark: remark,
@@ -408,13 +403,13 @@ export const DeviceDetails = () => {
         in_house_flag: inhouse,
         location: comLoc,
         changed_json: parsedResult["SECONDARY INFO"],
-        uni_casting_admin: QR_STSTEM_ADMIN,
+        uni_casting_admin: null,
         camera_serial_number: camSerialInfo,
       },
     };
+
     const encodedData = btoa(JSON.stringify(dObject));
     const finalData = { data: encodedData };
-    console.log(dObject);
 
     try {
       const response = await fetch(
@@ -429,33 +424,19 @@ export const DeviceDetails = () => {
       );
 
       if (!response.ok) {
-        console.log("network");
         throw new Error("Network response was not ok");
       }
 
       const result = await response.json();
-      console.log("result done", result);
-      if (result.data == true) {
-        // ToastAndroid.showWithGravity("")
-        Alert.alert("Success", "Product has been created successfully!");
 
-        setModalval("");
-        setComName("");
-        setComputerInfo("");
-        setIoInfo("");
-        setInputval("");
-        setOutputval("");
-        setUid("");
-        setRemark("");
-        setComLoc("");
-        setCamSerialInfo("");
-        navigatation.navigate(RouteNames.HomeScreen);
+      if (result.success) {
+        Alert.alert("Success", "Product has been created successfully!");
       } else {
         Alert.alert("Error", "Failed to create product. Please try again.");
       }
     } catch (error) {
       console.error("Error creating product:", error);
-      // Alert.alert("Error", "An error occurred while creating the product.");
+      Alert.alert("Error", "An error occurred while creating the product.");
     }
   };
 
@@ -504,8 +485,8 @@ export const DeviceDetails = () => {
         value: item.id,
       }))
     );
-    //console.log("my results ----- company lens info --  ",lensData);
-    // console.log("my results ----- company lens info -- ", JSON.stringify(result.data.additional_data, null, 2));
+    // //console.log("my results ----- company lens info --  ",lensData);
+    // //console.log("my results ----- company lens info --  ",result.data.additional_data.mast_comp_lens_serial);
     const invoiceData = result.data?.latest_products?.map(
       (product: MachineRecord) => {
         const inid = product.invoice_number.split(" ");
@@ -678,7 +659,6 @@ export const DeviceDetails = () => {
               <View
                 style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
               >
-                {/* <Text>{JSON.parse(QR_STSTEM_TYPE)}</Text> */}
                 {/* <CustomTextInput
                   inputType="Text"
                   placeholder="Enter Company Name"
@@ -693,7 +673,7 @@ export const DeviceDetails = () => {
                   inputContainerStyle={{
                     backgroundColor: GlobalAppColor.White,
                   }}
-                  value={QR_STSTEM_TYPE === "In House" ? "SPAN" : comName}
+                  value={comName}
                   onChange={(event) => {
                     event.persist(); // Persist the event to avoid it being reused
                     setComName(event.nativeEvent.text); // Use the text from nativeEvent if you need more control

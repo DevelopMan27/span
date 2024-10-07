@@ -1,11 +1,4 @@
-import {
-  Pressable,
-  SafeAreaView,
-  Text,
-  View,
-  BackHandler,
-  Alert,
-} from "react-native";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 import { CustomTextInput } from "../../components/CustomTextInput";
 import { GlobalAppColor, GlobalStyle } from "../../CONST";
 import React, { useCallback, useEffect, useState } from "react";
@@ -14,7 +7,6 @@ import { btoa, atob } from "react-native-quick-base64";
 import { FlashList } from "@shopify/flash-list";
 import { useNavigation } from "@react-navigation/native";
 import { RouteNames } from "../../navigation/routesNames";
-
 type UserType = {
   id: "string";
   username: "string";
@@ -65,21 +57,6 @@ export const UserList = () => {
     []
   );
 
-  const navigatation = useNavigation();
-  useEffect(() => {
-    const backAction = () => {
-      navigatation.navigate(RouteNames.HomeScreen);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [navigatation]);
-
   useEffect(() => {
     getUserList();
   }, []);
@@ -87,15 +64,14 @@ export const UserList = () => {
   useEffect(() => {
     fetchLicensesDebounced(searchText);
   }, [searchText, fetchLicensesDebounced]);
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "0":
-        return "PENDING";
+        return "Pending";
       case "1":
-        return "ACTIVE";
+        return "Active";
       case "2":
-        return "DEACTIVE";
+        return "De Active";
       default:
         return "Unknown";
     }
@@ -108,12 +84,7 @@ export const UserList = () => {
   return (
     <>
       <SafeAreaView
-        style={{
-          display: "flex",
-          flex: 1,
-          flexDirection: "column",
-          backgroundColor: GlobalAppColor.AppWhite,
-        }}
+        style={{ display: "flex", flex: 1, flexDirection: "column" }}
       >
         <View
           style={{
@@ -138,7 +109,6 @@ export const UserList = () => {
             }}
           />
         </View>
-
         <View
           style={{
             display: "flex",
@@ -162,53 +132,36 @@ export const UserList = () => {
                         borderWidth: 1,
                         borderRadius: 6,
                         borderColor: "#BEC3CC",
-                        shadowColor: GlobalAppColor.GREY,
-                        shadowRadius: 3,
                       },
-                      { backgroundColor: pressed ? "#EDF4FF" : "#FFFFFF" },
+                      { backgroundColor: pressed ? "#E0E0E0" : "#FFFFFF" },
                     ]}
                     android_ripple={{ color: "#D3D3D3" }}
                     onPress={() => {
                       navigate(RouteNames.UserDetails, { id: item.id });
                     }}
                   >
-                    <View style={{ display: "flex", flexDirection: "row" }}>
-                      <View
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          flex: 3,
-                        }}
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text
+                        style={
+                          (GlobalStyle.TextStyle600_20_27,
+                          { fontSize: 14, lineHeight: 19 })
+                        }
                       >
-                        <Text
-                          style={
-                            (GlobalStyle.TextStyle600_20_27,
-                            { fontSize: 16, lineHeight: 19, fontWeight: "600" })
-                          }
-                        >
-                          {item.username}
-                        </Text>
-                        <Text
-                          style={
-                            (GlobalStyle.TextStyle600_20_27,
-                            { fontSize: 14, lineHeight: 19, marginTop: 5 })
-                          }
-                        >
-                          ({item.designation})
-                        </Text>
-                      </View>
+                        {item.username}
+                      </Text>
                       <View
                         style={{
                           borderColor: statusColorMap[item.status] || "#000",
                           borderWidth: 1,
                           paddingHorizontal: 15,
                           paddingVertical: 7,
-                          borderRadius: 8,
-                          margin: "auto",
-                          alignItems: "center",
-                          alignSelf: "flex-end",
-                          flex: 1,
+                          borderRadius: 6,
                         }}
                       >
                         <Text
@@ -220,6 +173,14 @@ export const UserList = () => {
                         </Text>
                       </View>
                     </View>
+                    <Text
+                      style={
+                        (GlobalStyle.TextStyle600_20_27,
+                        { fontSize: 14, lineHeight: 19 })
+                      }
+                    >
+                      ({item.designation})
+                    </Text>
                   </Pressable>
                 </>
               );

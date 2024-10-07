@@ -13,12 +13,10 @@ export const SystemTypeBottomSheetChild = ({ onPress }) => {
     "In House" | "On Site" | undefined
   >(undefined);
 
-  const handleSystemTypeChange = async (newType) => {
+  const handleSystemTypeChange = async (newType: "In House" | "On Site") => {
     setSystemType(newType);
-    console.log(newType)
     try {
       await storeData("QR_SYSTEM_TYPE", JSON.stringify(newType));
-      console.log("value stored")
     } catch (error) {
       console.error("Error saving system type:", error);
     }

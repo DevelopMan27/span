@@ -35,7 +35,6 @@ export const CustomTextInput: FC<CustomTextInputProps> = ({
       value={value}
       editable={true}
       keyboardType={keyboardType}
-      autoCapitalize="characters"  
       {...props}
     />
   );

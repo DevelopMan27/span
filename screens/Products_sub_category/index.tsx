@@ -19,9 +19,6 @@ import { useBottomSheetContext } from "../../contexts/BottomSheetContext";
 import { UpdateUserTypeChild } from "../UserDetails/UpdateUserTypeChild";
 import { Product_sub_child } from "./Product_sub_child";
 import { AddNewPartBottomSheet } from "../../components/AddNewPartBottomSheet";
-import { useNavigation } from "@react-navigation/native";
-import { BackHandler } from "react-native";
-
 
 type PartDetailsProps = RouteProp<
   RootStackParamList,
@@ -51,23 +48,6 @@ export const Products_sub_category = () => {
   const [selectedData, setSelectedData] = useState<dataTypeSubCat | undefined>(
     undefined
   );
-
-  const navigatation = useNavigation();
-  useEffect(() => {
-    const backAction = () => {
-      navigatation.navigate(RouteNames.Parts);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigatation]);
-
-
   const [data, setData] = useState<dataTypeSubCat[]>([]);
   const getListOfAllProducts = async () => {
     const token = await getUserToken();

@@ -10,7 +10,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  ToastAndroid,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -96,7 +95,7 @@ export const AboutText = () => {
 
   const formik = useFormik({
     validationSchema: LoginSchema,
-    // enableReinitialize: true,
+    enableReinitialize: true,
     initialValues: {
       email: userData?.data?.email,
       name: userData?.data?.username,
@@ -133,21 +132,22 @@ export const AboutText = () => {
       );
 
       const result = await response.json();
+      //console.log("update result", result);
+      //console.log("result.success:", result.success, typeof result.success);
 
       if (result.success) {
-        ToastAndroid.showWithGravity(
-          "Your profile has been updated successfully.",
-          ToastAndroid.SHORT,
-          ToastAndroid.BOTTOM
-        );
+        // Show success toast
+        //console.log("Inside Toast==>");
+
+        Toast.show({
+          type: "success",
+          text1: "Update Successful",
+          text2: "Your profile has been updated successfully.",
+        });
         setLoading(false);
       } else {
         setLoading(false);
-        ToastAndroid.showWithGravity(
-          "Update Failed",
-          ToastAndroid.SHORT,
-          ToastAndroid.BOTTOM
-        );
+        Alert.alert("Update Failed", result.message);
       }
     },
   });

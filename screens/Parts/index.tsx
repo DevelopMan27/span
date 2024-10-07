@@ -5,24 +5,9 @@ import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalStyle } from "../../CONST";
 import { useNavigation } from "@react-navigation/native";
 import { RouteNames } from "../../navigation/routesNames";
-import { BackHandler } from "react-native";
 
 export const Parts = () => {
   const { navigate } = useNavigation();
-  const navigatation = useNavigation();
-  useEffect(() => {
-    const backAction = () => {
-      navigatation.navigate(RouteNames.HomeScreen);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigatation]);
   const getListOfAllProducts = async () => {
     const token = await getUserToken();
     const user = await getUserData();
@@ -106,7 +91,7 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              Sub Products 
+              Products sub category
             </Text>
           </Pressable>
           <Pressable

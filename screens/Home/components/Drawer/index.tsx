@@ -1,29 +1,16 @@
-import { Image, Text, View,Alert } from "react-native";
+import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GlobalAppColor, GlobalStyle } from "../../../../CONST";
 import { MenuItem } from "./MenuItem";
 import { useNavigation } from "@react-navigation/native";
 import { RouteNames } from "../../../../navigation/routesNames";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { clearData, getUserData } from "../../../../utils";
+import { clearData } from "../../../../utils";
 import { useAuthContext } from "../../../../contexts/UserAuthContext";
-import { useEffect, useState } from "react";
-
 
 export const Drawer = () => {
   const { navigate } = useNavigation();
   const { setAPIUSER } = useAuthContext();
-  const [usertype, setUsertype] = useState("");
-  useEffect(() => {
-    getDatas();
-  });
-
-  const getDatas = async () => {
-    const user = await getUserData();
-    const ab = user?.data.user_type;
-    setUsertype(ab);
-  };
-
   return (
     <SafeAreaView
       style={{
@@ -68,69 +55,35 @@ export const Drawer = () => {
             navigate(RouteNames.About);
           }}
         />
-        {usertype == "3" && (
-          <>
-            <MenuItem
-              menuName={"System List"}
-              onPress={() => {
-                navigate(RouteNames.License);
-              }}
-            />
-            <MenuItem
-              menuName={"User List"}
-              onPress={() => {
-                navigate(RouteNames.UserList);
-              }}
-            />
-            <MenuItem
-              menuName={"Announcement"}
-              onPress={() => {
-                navigate(RouteNames.Announcement);
-              }}
-            />
-          </>
-        )}
-        {usertype === "3" || usertype === "2" ? (
-          <>
-            <MenuItem
-              menuName={"Parts / Component"}
-              onPress={() => {
-                navigate(RouteNames.Parts);
-              }}
-            />
-          </>
-        ) : null}
-
+        <MenuItem
+          menuName={"System List"}
+          onPress={() => {
+            navigate(RouteNames.License);
+          }}
+        />
+        <MenuItem
+          menuName={"User List"}
+          onPress={() => {
+            navigate(RouteNames.UserList);
+          }}
+        />
+        <MenuItem
+          menuName={"Parts / Component"}
+          onPress={() => {
+            navigate(RouteNames.Parts);
+          }}
+        />
         <MenuItem
           menuName={"Logout"}
-          onPress={() => {
-            Alert.alert(
-              "Confirm Logout",
-              "Are you sure you want to log out?",
-              [
-                {
-                  text: "Cancel",
-                  style: "cancel", // Styling for cancel button
-                },
-                {
-                  text: "Logout",
-                  onPress: async () => {
-                    try {
-                      await auth().signOut();
-                      console.log("User signed out!");
-                      await clearData("API_USER");
-                      await clearData("EXPIRY_DATE");
-                      await clearData("USER_DATA");
-                      await clearData("USER_TOKEN");
-                      setAPIUSER(false); // Make sure setAPIUSER is defined in your scope
-                    } catch (error) {
-                      console.error("Error signing out: ", error);
-                    }
-                  },
-                },
-              ],
-              { cancelable: false } // Prevents closing the alert by tapping outside of it
-            );
+          onPress={async () => {
+            auth()
+              .signOut()
+              .then(() => console.log("User signed out!"));
+            await clearData("API_USER");
+            await clearData("EXPIRY_DATE");
+            await clearData("USER_DATA");
+            await clearData("USER_TOKEN");
+            setAPIUSER(false);
           }}
         />
       </View>

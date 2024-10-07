@@ -1,6 +1,0 @@
-** BUILD FAILED **
-
-
-The following build commands failed:
-	PhaseScriptExecution [CP-User]\ [Hermes]\ Replace\ Hermes\ for\ the\ right\ configuration,\ if\ needed /Users/apple/Library/Developer/Xcode/DerivedData/guru-bbstrzighyxmazhexlzlctubikui/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/hermes-engine.build/Script-46EB2E0005F270.sh (in target 'hermes-engine' from project 'Pods')
-(1 failure)

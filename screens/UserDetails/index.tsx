@@ -15,8 +15,7 @@ import BottomSheet from "../../components/BottomSheetComponent";
 import { AdminBottomSheetChild } from "../Home/components/HomeView/AdminBottomSheetChild";
 import { useBottomSheetContext } from "../../contexts/BottomSheetContext";
 import { UpdateUserTypeChild } from "./UpdateUserTypeChild";
-import { useNavigation } from "@react-navigation/native";
-import { BackHandler } from "react-native";
+
 interface User {
   id: string;
   username: string;
@@ -47,20 +46,6 @@ export const UserDetails = () => {
     Alert.alert("Modify Type button pressed");
   };
 
-  const navigatation = useNavigation();
-  useEffect(() => {
-    const backAction = () => {
-      navigatation.navigate(RouteNames.UserList);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigatation]);
   const handleActiveDeactivate = async (statusToUpdate: string) => {
     const token = await getUserToken();
     const dObject = {
@@ -120,7 +105,7 @@ export const UserDetails = () => {
       );
 
       const result = await response.json();
-      console.log("result", result);
+      //console.log("result", result);
       setUserData(result?.data);
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -390,10 +375,9 @@ export const UserDetails = () => {
               { fontSize: 16, color: GlobalAppColor.Black },
             ]}
           >
-            {/* {getStatusText(userData?.status)} */}
-            {getStatusText(userData?.status) === "Active"
-              ? 
-              "Deactive":"Active"}
+            {getStatusText(userData?.status) === "De Active"
+              ? "Active"
+              : "De Active"}
           </Text>
         </Pressable>
       </View>

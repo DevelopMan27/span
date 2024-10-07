@@ -15,7 +15,6 @@ import { useNavigation } from "@react-navigation/native";
 import { useBottomSheetContext } from "../../../../contexts/BottomSheetContext";
 import { getUserData, getUserToken, storeData } from "../../../../utils";
 import { btoa, atob } from "react-native-quick-base64";
-import { getData } from "../../../../utils";
 
 export const AdminBottomSheetChild = () => {
   const { navigate } = useNavigation();
@@ -24,8 +23,6 @@ export const AdminBottomSheetChild = () => {
     openSelectAdminBottomSheetFun,
     closeSelectAdminBottomSheetFun,
   } = useBottomSheetContext();
-  const [QR_STSTEM_TYPE, setQR_SYSTEM_TYPE] = useState("");
-
   const [systemType, setSystemType] = useState<
     | "Admin1"
     | "Admin2"
@@ -63,38 +60,13 @@ export const AdminBottomSheetChild = () => {
       }
     );
     const result = await response.json();
-    // console.log("admins", result.data.additional_data.admins);
-    // console.log("Super Users", result.data.additional_data.super_users);
-    // console.log("type", userData?.data.user_type);
-    // console.log("choice", QR_STSTEM_TYPE);
-
-    const stype = await getSystemAndAdminData();
-
-    let adminList = [];
-    console.log("s type =====   ",stype);
-
-    if (stype ===  "In House") {
-      adminList = [
-        ...result?.data?.additional_data?.admins?.map((admin) => ({
-          label: admin.username,
-          value: admin.id,
-        })),
-        ...result?.data?.additional_data?.super_users?.map((superUser) => ({
-          label: superUser.username,
-          value: superUser.id,
-        })),
-      ];
-    } else if (stype === "On Site") {
-      adminList = result?.data?.additional_data?.admins?.map((admin) => ({
+    const adminList = result?.data?.additional_data?.admins?.map((admin) => {
+      return {
         label: admin.username,
         value: admin.id,
-      }));
-    }
-   
-    console.log("admin selected", adminList);
-
-  
-    if (adminList.length > 0) {
+      };
+    });
+    if (adminList) {
       setOptions(adminList);
     }
   };
@@ -107,28 +79,6 @@ export const AdminBottomSheetChild = () => {
       console.error("Error saving system type:", error);
     }
   };
-
-  const getSystemAndAdminData = async () => {
-    try {
-        // Retrieve the QR_SYSTEM_TYPE data
-        const QR_STSYEM_TYPEs = await getData("QR_SYSTEM_TYPE");
-        
-        // Check if QR_STSYEM_TYPEs is a string and remove surrounding quotes if present
-        if (typeof QR_STSYEM_TYPEs === 'string') {
-            const qrSystemType = QR_STSYEM_TYPEs.replace(/^"|"$/g, '');
-            return qrSystemType;
-        } else {
-            // Handle unexpected data type
-            console.warn("QR_SYSTEM_TYPE is not a string:", QR_STSYEM_TYPEs);
-            return null; // or return a default value if needed
-        }
-    } catch (error) {
-        console.error("Error fetching QR_SYSTEM_TYPE:", error);
-        return null; // or handle the error as needed
-    }
-};
-
-
   useEffect(() => {
     getAdminUserList();
   }, []);
@@ -144,7 +94,6 @@ export const AdminBottomSheetChild = () => {
           justifyContent: "center",
           flexDirection: "column",
           flex: 1,
-          marginTop: "10px",
         }}
       >
         <ActivityIndicator color={GlobalAppColor.AppBlue} size={"large"} />
