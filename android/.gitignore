@@ -13,3 +13,7 @@ local.properties
 
 # Bundle artifacts
 *.jsbundle
+.gradle
+
+*.cxx
+
