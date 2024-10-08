@@ -180,6 +180,15 @@ export const HomeView = () => {
         alert("Make sure Whatsapp installed on your device");
       });
   };
+
+
+  
+
+  useEffect(() => {
+    userData();
+    getProductList();
+  }, []);
+
   const getProductList = async () => {
     const token = await getUserToken();
     const userData = await getUserData();
@@ -233,11 +242,6 @@ export const HomeView = () => {
       setInvoiceData(invoiceData);
     }
   };
-
-  useEffect(() => {
-    userData();
-    getProductList();
-  }, []);
 
   return (
     <>

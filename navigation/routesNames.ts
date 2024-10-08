@@ -9,6 +9,7 @@ export enum RouteNames {
   LicenseDetails = "LicenseDetails",
   NotificationList = "NotificationList",
   License = "License",
+  LicenseStack = "LicenseStack",
   UserList = "UserList",
   UserDetails = "UserDetails",
   Parts = "Parts",

@@ -45,53 +45,7 @@ export const OTP = () => {
     return mobileNumber;
   }
 
-  const storeLoginData = async (loginResult) => {
-    const token = loginResult.data.token; // Get user token
-    const dObject = {
-      authorization: token,
-      input: {
-        designation: loginResult.data?.designation,
-        ftoken: loginResult.data?.ftoken,
-        user_id: loginResult.data?.user_id,
-        user_mobile: loginResult.data?.user_mobile,
-        user_name: loginResult.data?.user_name,
-        user_status: loginResult.data?.user_status,
-        user_type: loginResult.data?.user_type,
-        role: loginResult.role,
-        token: loginResult.token,
-        username: loginResult.username,
-      },
-    };
 
-    // Encode the data object
-    const encodedData = btoa(JSON.stringify(dObject));
-    const finalData = { data: encodedData };
-
-    try {
-      // Make the API request to store the login data
-      const response = await fetch(
-        "https://hum.ujn.mybluehostin.me/span/v1/master.php", // Endpoint to store the login data
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(finalData),
-        }
-      );
-
-      // Parse the response
-      const result = await response.json();
-
-      if (response.ok) {
-        console.log("Login data stored successfully:", result);
-      } else {
-        console.error("Error storing login data:", result);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
 
   const formik = useFormik({
     validationSchema: LoginSchema,

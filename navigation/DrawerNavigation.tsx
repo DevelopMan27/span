@@ -24,6 +24,7 @@ import { IO_serial_number } from "../screens/IO_serial_number";
 import { IPC_service_tag } from "../screens/IPC_service_tag";
 import { Lens_info } from "../screens/Lens_info";
 import { Comp_lens_serial } from "../screens/Comp_lens_serial";
+import LicenseStackNavigator from "./LicenseStack";
 
 const Drawer = createDrawerNavigator();
 
@@ -168,7 +169,7 @@ const DrawerNavigation = () => {
             ),
           }}
         />
-        <Drawer.Screen
+        {/* <Drawer.Screen
           name="License"
           component={License}
           options={{
@@ -197,6 +198,16 @@ const DrawerNavigation = () => {
                 color={GlobalAppColor.White}
               />
             ),
+          }}
+        /> */}
+        <Drawer.Screen
+          name="LicenseStack"
+          component={LicenseStackNavigator}
+          options={{
+            title: "License",
+            sceneContainerStyle: {
+              backgroundColor: GlobalAppColor.AppWhite,
+            },
           }}
         />
         <Drawer.Screen

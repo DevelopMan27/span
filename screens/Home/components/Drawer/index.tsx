@@ -58,7 +58,7 @@ export const Drawer = () => {
         <MenuItem
           menuName={"System List"}
           onPress={() => {
-            navigate(RouteNames.License);
+            navigate(RouteNames.LicenseStack);
           }}
         />
         <MenuItem

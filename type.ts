@@ -32,6 +32,7 @@ export type RootStackParamList = {
   };
   [RouteNames.NotificationList]: undefined;
   [RouteNames.License]: undefined;
+  [RouteNames.LicenseStack]: undefined;
   [RouteNames.UserList]: undefined;
   [RouteNames.UserDetails]: {
     id: string;
