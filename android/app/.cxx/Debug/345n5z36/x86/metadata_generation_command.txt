@@ -1,0 +1,18 @@
+                        -H/Users/apple/Documents/GitHub/span/android/app/src/main/cpp
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=23
+-DANDROID_PLATFORM=android-23
+-DANDROID_ABI=x86
+-DCMAKE_ANDROID_ARCH_ABI=x86
+-DANDROID_NDK=/Users/apple/Library/Android/sdk/ndk/25.1.8937393
+-DCMAKE_ANDROID_NDK=/Users/apple/Library/Android/sdk/ndk/25.1.8937393
+-DCMAKE_TOOLCHAIN_FILE=/Users/apple/Library/Android/sdk/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/Users/apple/Library/Android/sdk/cmake/3.22.1/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/Users/apple/Documents/GitHub/span/android/app/build/intermediates/cxx/Debug/345n5z36/obj/x86
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/Users/apple/Documents/GitHub/span/android/app/build/intermediates/cxx/Debug/345n5z36/obj/x86
+-DCMAKE_BUILD_TYPE=Debug
+-B/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86
+-GNinja
+                        Build command args: []
+                        Version: 2

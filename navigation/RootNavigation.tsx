@@ -18,6 +18,8 @@ import ProfileScreen from "./ProfileScreen";
 import CustomHeaderButton from "./CustomHeaderButton";
 import { useNotificationToken } from "../hook/useNotificationToken ";
 import { useLastNotificationResponse } from "../hook/useLastNotificationResponse";
+import { License } from "../screens/License";
+import SplashScreen from "../screens/Splash";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -79,15 +81,7 @@ const RootNavigation = () => {
 
   return (
     <>
-      {/* <Drawer.Navigator>
-        <Drawer.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="MainTabs"
-          component={MainTabs}
-        />
-      </Drawer.Navigator> */}
+
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
