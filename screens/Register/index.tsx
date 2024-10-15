@@ -26,118 +26,35 @@ import { RegistrationConfirmation } from "../../components/RegistrationConfirmat
 
 export const Register = () => {
   const { navigate } = useNavigation();
-  const [confirm, setConfirm] = useState<
-    FirebaseAuthTypes.ConfirmationResult | undefined
-  >(undefined);
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult>();
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string()
-      .email("Please enter a valid email address.")
+      .email("Please Enter A Valid Email Address.")
       .matches(
         /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        "Please enter a valid email address."
+        "Please Enter A Valid Email Address."
       )
-      .required("Email is required."),
-    mobile: Yup.string().required("Mobile number is required."),
-    name: Yup.string().required("Please enter name"),
-    designation: Yup.string().required("Please enter designation"),
+      .required("Email Is Required."),
+    mobile: Yup.string()
+      .length(10, "Mobile Number Must Be Exactly 10 Digits.")
+      .required("Mobile Number Is Required."),
+    name: Yup.string().required("Please Enter Name."),
+    designation: Yup.string().required("Please Enter Designation."),
   });
-
-  async function signInWithPhoneNumber(phoneNumber: string) {
-    const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-    setConfirm(confirmation);
-  }
-  const checkUserExists = async (mobile: any) => {
-    try {
-      // Prepare the request payload
-      const dObject = {
-        authorization: "", // Include authorization if needed
-        input: {
-          mobile: mobile, // Mobile number to check
-        },
-      };
-
-      // Encode the data if needed
-      const encodedData = btoa(JSON.stringify(dObject));
-      const finalData = { data: encodedData };
-
-      // Send a request to check if the user exists
-      const response = await fetch(
-        "https://hum.ujn.mybluehostin.me/span/v1/registration.php", // Using the same registration endpoint
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(finalData), // Send the correct payload
-        }
-      );
-
-      // Parse the response
-      const result = await response.json();
-      //console.log("result", result);
-
-      // Check if the response contains "Mobile number already exists"
-      if (result.message === "Mobile number already exists") {
-        return true; // User exists
-      } else {
-        return false; // User does not exist
-      }
-    } catch (error) {
-      console.error("Error checking user existence:", error);
-      return false; // Return false if there's an error
-    }
-  };
+  
   const { token: ExpoToken } = useNotificationToken();
-  const login = async (value: {
-    email: string;
-    mobile: string;
-    name: string;
-    designation: string;
-  }) => {
-    //console.log("VVVV", value);
-    // Create the registration data object
-    // const token = "";
-    // const dObject = {
-    //   authorization: token,
-    //   input: {
-    //     mobile: value.mobile,
-    //     username: value.name,
-    //     email: value.email,
-    //     designation: value.designation,
-    //     fb_uid: "Firebase Uid",
-    //   },
-    // };
-    // const encodedData = btoa(JSON.stringify(dObject));
-    // const finalData = { data: encodedData };
-    // //console.log("====finalData====", finalData);
-    // Send the POST request to the registration endpoint
-    // const response = await fetch(
-    //   "https://hum.ujn.mybluehostin.me/span/v1/registration.php",
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(finalData),
-    //   }
-    // );
-    // const result = await response.json();
-    // //console.log("result", result);
-    // if (result.success) {
-    //   Alert.alert("Registration Successful", `User ID: ${result.data}`);
-    // } else {
-    //   Alert.alert("Registration Failed", result.message);
-    // }
-  };
+
   function addCountryCode(number) {
     if (!number.startsWith("+91")) {
       return "+91" + number;
     }
     return number;
   }
+
   const registerUser = async ({
     mobile,
     name,
@@ -166,7 +83,6 @@ export const Register = () => {
     console.log("dObject", dObject);
     const encodedData = btoa(JSON.stringify(dObject));
     const finalData = { data: encodedData };
-
     try {
       const response = await fetch(
         "https://hum.ujn.mybluehostin.me/span/v1/registration.php",
@@ -179,6 +95,10 @@ export const Register = () => {
         }
       );
       const result = await response.json();
+      console.log(result.success);
+      if(!result.success){
+        Alert.alert("Try Again",result.message);
+      }
       return result;
     } catch (error) {
       console.error("Registration error:", error);
@@ -188,6 +108,7 @@ export const Register = () => {
       };
     }
   };
+
   const formik = useFormik({
     validationSchema: LoginSchema,
     initialValues: {
@@ -205,9 +126,9 @@ export const Register = () => {
       //   designation: formik.values.designation,
       // });
       setLoading(true);
-      const updatedNumber = addCountryCode(values.mobile);
+      // const updatedNumber = addCountryCode(values.mobile);
+      const updatedNumber = values.mobile;
       formik.setFieldValue("mobile", updatedNumber);
-      // const mobilenum = removeCountryCode(mobile);
       // await signInWithPhoneNumber(updatedNumber);
       const registrationResult = await registerUser({
         mobile: formik.values.mobile,
@@ -282,7 +203,7 @@ export const Register = () => {
               </Text>
               <CustomTextInput
                 inputType="Text"
-                placeholder="Enter your name"
+                placeholder="Enter Your Name"
                 inputContainerStyle={{
                   borderColor: "#D0D5DD",
                   borderRadius: 8,
@@ -292,6 +213,7 @@ export const Register = () => {
                 onChangeText={(text) => {
                   formik.setFieldValue("name", text);
                 }}
+                errorMessage={formik.errors.name} 
               />
             </View>
             <View
@@ -303,7 +225,7 @@ export const Register = () => {
               <CustomTextInput
                 inputType="Text"
                 keyboardType="number-pad"
-                placeholder="Mobile"
+                placeholder="Enter Mobile Number"
                 inputContainerStyle={{
                   borderColor: "#D0D5DD",
                   borderRadius: 8,
@@ -314,6 +236,7 @@ export const Register = () => {
                 onChangeText={(text) => {
                   formik.setFieldValue("mobile", text);
                 }}
+                errorMessage={formik.errors.mobile} // Display error message
               />
             </View>
             <View
@@ -325,7 +248,7 @@ export const Register = () => {
               <CustomTextInput
                 inputType="Text"
                 keyboardType="default"
-                placeholder="Enter your email "
+                placeholder="Enter Your Email "
                 inputContainerStyle={{
                   borderColor: "#D0D5DD",
                   borderRadius: 8,
@@ -335,6 +258,7 @@ export const Register = () => {
                 onChangeText={(text) => {
                   formik.setFieldValue("email", text);
                 }}
+                errorMessage={formik.errors.email}
               />
             </View>
             <View
@@ -346,7 +270,7 @@ export const Register = () => {
               <CustomTextInput
                 inputType="Text"
                 keyboardType="default"
-                placeholder="Admin | Super User | Regular User"
+                placeholder="Enter Designation"
                 inputContainerStyle={{
                   borderColor: "#D0D5DD",
                   borderRadius: 8,
@@ -356,6 +280,7 @@ export const Register = () => {
                 onChangeText={(text) => {
                   formik.setFieldValue("designation", text);
                 }}
+                errorMessage={formik.errors.designation}
               />
             </View>
           </View>

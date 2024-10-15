@@ -1,27 +1,31 @@
-import { ActivityIndicator, Platform, ScrollView, Text, View } from "react-native";
-import { GlobalStyle } from "../../CONST";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
+import { GlobalAppColor, GlobalStyle } from "../../CONST";
 import { getData, getUserData, getUserToken } from "../../utils";
 import { useEffect, useState } from "react";
-import { useAuthContext } from "../../contexts/UserAuthContext";
-import { btoa } from "react-native-quick-base64";
 import { FlashList } from "@shopify/flash-list";
+import { btoa } from "react-native-quick-base64";
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+}
 
 export const NotificationList = () => {
-  const [notificationList, setNotificationList] = useState();
+  const [notificationList, setNotificationList] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   const shadowStyle = Platform.select({
-    ios: {
-      shadowColor: "#0000000F",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 14,
-    },
-    android: {
-      elevation: 10, // You may need to adjust this value to get a similar effect
-    },
+    // ios: {
+    //   shadowColor: "#0000000F",
+    //   shadowOffset: { width: 0, height: 4 },
+    //   shadowOpacity: 0.15,
+    //   shadowRadius: 14,
+    // },
+    // android: {
+    //   elevation: 1, // Adjust this value for a similar effect
+    // },
   });
-
 
   const getNotificationList = async (id: string) => {
     try {
@@ -44,74 +48,77 @@ export const NotificationList = () => {
           body: JSON.stringify(finalData),
         }
       );
+
+      if (!response.ok) {
+        console.log("result", "erroe");
+
+        throw new Error("Network response was not ok");
+
+      }
+
       const result = await response.json();
-      setNotificationList(result);
+      setNotificationList(result.data);
+      console.log("result", result);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     } finally {
       setLoading(false); // Stop loading when done
     }
   };
+  const getUser = async () => {
+    try {
+      const userData = await getUserData();
+      if (userData?.id) {
+        await getNotificationList(userData.id);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const userData = await getUserData();
-
-        if (userData?.id) {
-          await getNotificationList(userData.id); 
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     getUser();
   }, []);
 
-        //console.log("notificationList___________",notificationList)
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }: { item: Notification }) => {
     return (
       <View
         style={[
           {
             padding: 13,
             borderWidth: 1,
+            margin:10,
             borderRadius: 6,
-            borderColor: "#BEC3CC",
+            borderColor:GlobalAppColor.GREY,
+            shadowColor:GlobalAppColor.AppGrey,
+            backgroundColor:GlobalAppColor.AppWhite
           },
           shadowStyle,
         ]}
       >
-        <Text
-          style={
-            (GlobalStyle.TextStyle600_20_27, { fontSize: 14, lineHeight: 19 })
-          }
+        {/* <Text
+          style={[
+            GlobalStyle.TextStyle600_20_27,
+            { fontSize: 14, lineHeight: 19 },
+          ]}
         >
-          TORRENT PHARMA
-          <Text style={{ color: "#000000CC" }}>
-            {" "}
-            Licence has been Approved By Mr Anil Siddhapura
-          </Text>
-        </Text>
+          {item.title}
+        </Text> */}
+        <Text style={{ color: "#000000CC" }}>{item.message}</Text>
       </View>
-    
-    )
-  }
+    );
+  };
 
   return (
-   <>
-   
-       <FlashList
-       data={notificationList}
-       renderItem={renderItem}
-       keyExtractor={(item) => item.id.toString()} // Ensure each item has a unique id
-       estimatedItemSize={70} 
-      />
-      </>
+    <FlashList
+      data={notificationList}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.id.toString()} // Ensure each item has a unique id
+      estimatedItemSize={70}
+    />
   );
 };

@@ -1,4 +1,4 @@
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import {
   RootStackParamList,
   dataTypeCatMaster,
@@ -19,7 +19,7 @@ import {
 } from "../../utils";
 import { useEffect, useState } from "react";
 import { btoa } from "react-native-quick-base64";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { BackHandler, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalAppColor, GlobalStyle } from "../../CONST";
 import { FlashList } from "@shopify/flash-list";
 import BottomSheet from "../../components/BottomSheetComponent";
@@ -88,6 +88,25 @@ export const Comp_lens_serial = () => {
   useEffect(() => {
     getListOfAllProducts();
   }, []);
+
+  const navigation = useNavigation();
+  useEffect(() => {
+    const backAction = () => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: RouteNames.Parts }],
+      });
+      return true;
+    };
+  
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+  
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <>
       <View
@@ -124,7 +143,7 @@ export const Comp_lens_serial = () => {
               { fontSize: 16, color: GlobalAppColor.White },
             ]}
           >
-            Add new Computer lense serial
+            Add Camera Info
           </Text>
         </Pressable>
         <View style={{ display: "flex", flex: 1 }}>

@@ -23,7 +23,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /Users/apple/Library/Android/sdk/cmake/3.22.1/bin/cmake --regenerate-during-build -S/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild -B/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild
+  command = /Users/apple/Library/Android/sdk/cmake/3.22.1/bin/cmake --regenerate-during-build -S"/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild" -B"/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild"
   description = Re-running CMake...
   generator = 1
 

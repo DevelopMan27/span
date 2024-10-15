@@ -1,20 +1,20 @@
 {
   "buildFiles": [
-    "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86_64/_deps/json-src/CMakeLists.txt",
-    "/Users/apple/Documents/GitHub/span/android/app/src/main/cpp/CMakeLists.txt"
+    "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64/_deps/json-src/CMakeLists.txt",
+    "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/src/main/cpp/CMakeLists.txt"
   ],
   "cleanCommandsComponents": [
     [
       "/Users/apple/Library/Android/sdk/cmake/3.22.1/bin/ninja",
       "-C",
-      "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86_64",
+      "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64",
       "clean"
     ]
   ],
   "buildTargetsCommandComponents": [
     "/Users/apple/Library/Android/sdk/cmake/3.22.1/bin/ninja",
     "-C",
-    "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86_64",
+    "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86_64",
     "{LIST_OF_TARGETS_TO_BUILD}"
   ],
   "libraries": {
@@ -22,7 +22,7 @@
       "toolchain": "toolchain",
       "abi": "x86_64",
       "artifactName": "MyNativeModule",
-      "output": "/Users/apple/Documents/GitHub/span/android/app/build/intermediates/cxx/Debug/345n5z36/obj/x86_64/libMyNativeModule.so",
+      "output": "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/build/intermediates/cxx/Debug/345n5z36/obj/x86_64/libMyNativeModule.so",
       "runtimeFiles": []
     }
   },

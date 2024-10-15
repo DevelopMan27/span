@@ -15,8 +15,12 @@ const InvoiceItem = ({
   invoiceNo,
   date,
   id,
+  page
 }) => {
   const { navigate } = useNavigation();
+  console.log(" page  ----  :  --    ",page)
+  const inv = invoiceNo.split("$");
+  const invoice = inv[0];
   return (
     <LinearGradient
       colors={colors}
@@ -43,12 +47,15 @@ const InvoiceItem = ({
         justifyContent: "space-between",
         rowGap: 5,
         flex: 1,
+        marginBottom:10,
+        marginTop:10
       }}
     >
       <Pressable
         onPress={() => {
           navigate(RouteNames.LicenseDetails, {
             id: id,
+            "page":page
           });
         }}
       >
@@ -109,7 +116,7 @@ const InvoiceItem = ({
                 color: statusColor,
               }}
             >
-              {status}
+              {status ? status : "no data"}
             </Text>
           </View>
         </View>
@@ -123,7 +130,7 @@ const InvoiceItem = ({
             }}
             numberOfLines={2}
           >
-            Invoice No: {invoiceNo}
+            Invoice No: {invoice ? invoice : "1234"}
           </Text>
           <Text
             style={{

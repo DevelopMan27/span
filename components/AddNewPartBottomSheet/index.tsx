@@ -132,39 +132,12 @@ export const AddNewPartBottomSheet = ({
     <>
       <View style={styles.container}>
         <Text style={[GlobalStyle.TextStyle600_20_27, { alignSelf: "center" }]}>
-          Add New Product sub Cat
+          Add New Sub Product
         </Text>
-        <CustomTextInput
-          inputType="Text"
-          inputContainerStyle={{
-            backgroundColor: GlobalAppColor.AppWhite,
-            // flex: 1,
-            marginTop: 58,
-          }}
-          placeholder="Enter product sub cat"
-          value={updatedName}
-          onChangeText={(text) => {
-            setUpdatedName(text);
-          }}
-        />
-        <CustomTextInput
-          inputType="Text"
-          keyboardType="number-pad"
-          inputContainerStyle={{
-            backgroundColor: GlobalAppColor.AppWhite,
-            // flex: 1,
-            marginTop: 24,
-          }}
-          placeholder="P Index"
-          value={pIndex}
-          onChangeText={(text) => {
-            setPIndex(text);
-          }}
-        />
         <Dropdown
           style={[
             styles.dropdown,
-            { marginTop: 24 },
+            { marginTop: 58 },
             isFocus && { borderColor: "blue" },
           ]}
           // placeholderStyle={styles.placeholderStyle}
@@ -189,6 +162,34 @@ export const AddNewPartBottomSheet = ({
             setIsFocus(false);
           }}
         />
+        <CustomTextInput
+          inputType="Text"
+          keyboardType="number-pad"
+          inputContainerStyle={{
+            backgroundColor: GlobalAppColor.AppWhite,
+            // flex: 1,
+            marginTop: 24,
+          }}
+          placeholder="P Index"
+          value={pIndex}
+          onChangeText={(text) => {
+            setPIndex(text);
+          }}
+        />
+         <CustomTextInput
+          inputType="Text"
+          inputContainerStyle={{
+            backgroundColor: GlobalAppColor.AppWhite,
+            // flex: 1,
+            marginTop: 24,
+          }}
+          placeholder="Enter product sub cat"
+          value={updatedName}
+          onChangeText={(text) => {
+            setUpdatedName(text);
+          }}
+        />
+      
         <Pressable
           style={({ pressed }) => [
             { marginTop: 56 },

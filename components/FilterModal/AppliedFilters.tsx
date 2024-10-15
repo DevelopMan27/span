@@ -47,11 +47,19 @@ export const AppliedFilters: React.FC<AppliedFiltersProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.filterLabel}>Filter:</Text>
+        <Text style={styles.filterLabel}>Filter : </Text>
         <View style={styles.filtersContainer}>
           {appliedFilters.map((filter, index) => (
             <View key={index} style={styles.filterItem}>
-              <Text style={styles.filterText}>{filter}</Text>
+              {/* Check if filter is "from" or "to" */}
+              {filter?.includes("From") || filter?.includes("To") ? (
+                <>
+                  {/* <Text>{"\n"}</Text> */}
+                  <Text style={styles.filterText}>{filter},</Text>
+                </>
+              ) : (
+                <Text style={styles.filterText}>{filter} ,</Text>
+              )}
             </View>
           ))}
         </View>
@@ -75,8 +83,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   filterLabel: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: 12,
+    color: GlobalAppColor.AppGrey,
+    marginLeft: 10,
     marginRight: 8,
     alignSelf: "flex-start",
     marginTop: 4, // Add some top margin to align with the first line of filters
@@ -91,8 +100,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   filterText: {
-    color: "black",
-    fontSize: 14,
+    color: GlobalAppColor.AppGrey,
+    marginTop: 4,
+    fontSize: 12,
   },
   clearButton: {
     marginLeft: "auto",
@@ -100,8 +110,9 @@ const styles = StyleSheet.create({
     marginTop: 4, // Add some top margin to align with the first line of filters
   },
   clearButtonText: {
-    color: GlobalAppColor.AppBlue,
-    fontSize: 14,
-    fontWeight: "bold",
+    color: GlobalAppColor.AppGrey,
+    fontSize: 12,
+    marginRight: 10,
+    fontWeight: "normal",
   },
 });

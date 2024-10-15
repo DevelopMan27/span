@@ -5,9 +5,24 @@ import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { GlobalStyle } from "../../CONST";
 import { useNavigation } from "@react-navigation/native";
 import { RouteNames } from "../../navigation/routesNames";
+import { BackHandler } from "react-native";
 
 export const Parts = () => {
   const { navigate } = useNavigation();
+  const navigatation = useNavigation();
+  useEffect(() => {
+    const backAction = () => {
+      navigatation.navigate(RouteNames.HomeScreen);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigatation]);
   const getListOfAllProducts = async () => {
     const token = await getUserToken();
     const user = await getUserData();
@@ -67,6 +82,33 @@ export const Parts = () => {
         }}
       >
         <ScrollView style={{ display: "flex", flex: 1 }}>
+        <Pressable
+            onPress={() => {
+              navigate(RouteNames.Products_category_master);
+            }}
+            style={({ pressed }) => [
+              {
+                marginBottom: 21,
+                height: 53,
+                borderWidth: 1,
+                borderRadius: 6,
+                borderColor: "#BEC3CC",
+                alignContent: "center",
+                justifyContent: "center",
+                paddingHorizontal: 25,
+              },
+              { backgroundColor: pressed ? "#F5F9FF" : "#EDF4FF" },
+            ]}
+          >
+            <Text
+              style={[
+                GlobalStyle.TextStyle600_20_27,
+                { fontSize: 14, lineHeight: 19 },
+              ]}
+            >
+              PRODUCTS
+            </Text>
+          </Pressable>
           <Pressable
             onPress={() => {
               navigate(RouteNames.Products_sub_category);
@@ -91,36 +133,10 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              Products sub category
+              SUB PRODUCTS 
             </Text>
           </Pressable>
-          <Pressable
-            onPress={() => {
-              navigate(RouteNames.Products_category_master);
-            }}
-            style={({ pressed }) => [
-              {
-                marginBottom: 21,
-                height: 53,
-                borderWidth: 1,
-                borderRadius: 6,
-                borderColor: "#BEC3CC",
-                alignContent: "center",
-                justifyContent: "center",
-                paddingHorizontal: 25,
-              },
-              { backgroundColor: pressed ? "#F5F9FF" : "#EDF4FF" },
-            ]}
-          >
-            <Text
-              style={[
-                GlobalStyle.TextStyle600_20_27,
-                { fontSize: 14, lineHeight: 19 },
-              ]}
-            >
-              Products category master
-            </Text>
-          </Pressable>
+        
           <Pressable
             onPress={() => {
               navigate(RouteNames.IO_serial_number);
@@ -145,7 +161,7 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              IO serial number
+              IO SERIAL NUMBER
             </Text>
           </Pressable>
           <Pressable
@@ -172,7 +188,7 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              IPC service tag
+              IPC SERVICE TAG
             </Text>
           </Pressable>
           <Pressable
@@ -199,7 +215,7 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              Lens info
+              LENS INFO
             </Text>
           </Pressable>
           <Pressable
@@ -226,7 +242,7 @@ export const Parts = () => {
                 { fontSize: 14, lineHeight: 19 },
               ]}
             >
-              Comp lens serial
+              CAMERA INFO
             </Text>
           </Pressable>
         </ScrollView>

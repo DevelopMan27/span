@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Platform, StyleSheet, TextInput } from "react-native";
+import { Platform, StyleSheet, TextInput, View, Text } from "react-native";
 import { CustomTextInputProps } from "../../type";
 import { GlobalAppColor, GlobalStyle } from "../../CONST";
 
@@ -13,30 +13,36 @@ export const CustomTextInput: FC<CustomTextInputProps> = ({
   inputType,
   containerStyle,
   inputContainerStyle,
+  errorMessage,
   ...props
 }) => {
   return (
-    <TextInput
-      style={[
-        styles.textInput,
-        inputContainerStyle,
-        GlobalStyle.TextStyle400_25_16,
-        {
-          fontSize: 14,
-          lineHeight: 19.07,
-          color: GlobalAppColor.Black,
-        },
-        Platform.OS == "ios" && { lineHeight: 0 },
-        inputType === "Password" && styles.passwordTextInput,
-      ]}
-      placeholder={placeholder}
-      placeholderTextColor={GlobalAppColor.GREY}
-      onChangeText={onChangeText}
-      value={value}
-      editable={true}
-      keyboardType={keyboardType}
-      {...props}
-    />
+    <View style={[styles.container, containerStyle]}>
+      <TextInput
+        style={[
+          styles.textInput,
+          inputContainerStyle,
+          GlobalStyle.TextStyle400_25_16,
+          {
+            fontSize: 14,
+            lineHeight: 19.07,
+            color: GlobalAppColor.Black,
+            borderColor: errorMessage ? "red" : GlobalAppColor.InputBorder, // Change border color based on error
+          },
+          Platform.OS === "ios" && { lineHeight: 0 },
+          inputType === "Password" && styles.passwordTextInput,
+        ]}
+        placeholder={placeholder}
+        placeholderTextColor={GlobalAppColor.GREY}
+        onChangeText={onChangeText}
+        value={value}
+        editable={true}
+        keyboardType={keyboardType}
+        autoCapitalize="characters"
+        {...props}
+      />
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+    </View>
   );
 };
 
@@ -74,12 +80,16 @@ const styles = StyleSheet.create({
     backgroundColor: GlobalAppColor.InputBackGround,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: GlobalAppColor.InputBorder,
     width: "100%",
     height: 42,
     paddingLeft: 16,
     paddingRight: 16,
-    overflow: "hidden"
+    overflow: "hidden",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 10,
+    marginTop: 2,
   },
   passwordTextInput: {
     alignContent: "center",

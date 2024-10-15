@@ -1,27 +1,16 @@
 import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
   View,
+  Text,
+  StyleSheet,
 } from "react-native";
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { Dropdown } from "react-native-element-dropdown";
-import { GlobalAppColor, GlobalFont, GlobalStyle } from "../../CONST";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { GlobalAppColor } from "../../CONST";
 
-
-
-export const DropdownComponent = ({data,subtitle,onChange}) => {
+export const DropdownComponent = ({ data, subtitle, onChange, errorMessage }) => {
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
-
-//   //console.log("--- received data ---",data)
-//   //console.log("--- received subtitle ---",subtitle)
   const renderLabel = () => {
     if (value || isFocus) {
       return (
@@ -33,13 +22,15 @@ export const DropdownComponent = ({data,subtitle,onChange}) => {
     return null;
   };
 
- 
-
   return (
     <View style={styles.container}>
       {renderLabel()}
       <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: "black" }]}
+        style={[
+          styles.dropdown,
+          isFocus && { borderColor: "black" },
+          { borderColor: errorMessage ? "red" : GlobalAppColor.InputBorder },
+        ]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
@@ -50,48 +41,33 @@ export const DropdownComponent = ({data,subtitle,onChange}) => {
         labelField="label"
         valueField="value"
         placeholder={!isFocus ? subtitle : ""}
-        searchPlaceholder="type here..."
+        searchPlaceholder="Type here..."
         value={value}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
-        onChange={onChange}
-        // (item) => {
-        //     // //console.log(item.label)
-        //   setValue(item.value);
-        //   setIsFocus(false);
-        // }
-        // renderLeftIcon={() => (
-        //   <AntDesign
-        //     style={styles.icon}
-        //     color={isFocus ? "black" : "black"}
-        //     name="Safety"
-        //     size={20}
-        //   />
-        // )}
+        onChange={(item) => {
+          setValue(item.value);
+          onChange(item); // Call the onChange function passed in props
+          setIsFocus(false);
+        }}
       />
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
     </View>
   );
 };
 
 export const styles = StyleSheet.create({
   container: {
-    // backgroundColor: "white",
-    // padding: 16,
-    marginTop:12
+    marginTop: 12,
   },
   dropdown: {
     height: 50,
-    borderColor: "gray",
     borderWidth: 0.5,
     borderRadius: 4,
     paddingHorizontal: 8,
   },
-  icon: {
-    marginRight: 5,
-  },
   label: {
     position: "absolute",
-    // backgroundColor: "white",
     left: 22,
     top: -12,
     zIndex: 999,
@@ -107,6 +83,10 @@ export const styles = StyleSheet.create({
   iconStyle: {
     width: 20,
     height: 20,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 10,
   },
   inputSearchStyle: {
     height: 40,

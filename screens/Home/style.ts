@@ -21,6 +21,7 @@ export const HomeStyle = StyleSheet.create({
   InVoiceItemParent: {
     display: "flex",
     flexDirection: "column",
+    flex:1,
     rowGap: 31,
     marginTop: 35,
   },

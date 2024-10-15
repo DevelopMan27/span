@@ -8,9 +8,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Modal from "react-native-modal";
-import { GlobalAppColor, GlobalStyle } from "../../CONST";
+import { GlobalAppColor } from "../../CONST";
 import DateTimePicker from "react-native-ui-datepicker";
 import { CheckBox } from "react-native-elements";
+import Icon from "react-native-vector-icons/Ionicons"; // Importing Ionicons from react-native-vector-icons
+import { useNavigation } from "@react-navigation/native";
+import { RouteNames } from "../../navigation/routesNames";
 
 const CustomDatePicker = ({ label, date, onDateChange }) => {
   const [showPicker, setShowPicker] = useState(false);
@@ -25,40 +28,51 @@ const CustomDatePicker = ({ label, date, onDateChange }) => {
   return (
     <TouchableOpacity onPress={togglePicker} style={styles.datePickerContainer}>
       <Text style={styles.dateLabel}>{label}</Text>
-      <TouchableOpacity onPress={togglePicker} style={styles.dateButton}>
-        <Text style={styles.dateButtonText}>
-          {date.toISOString().split("T")[0]}
-        </Text>
-      </TouchableOpacity>
+      <View
+        style={{
+          borderColor: GlobalAppColor.GREY,
+          borderWidth: 1,
+          padding: 5,
+          borderRadius: 5,
+        }}
+      >
+        <View style={styles.datePickerWrapper}>
+          <Text style={styles.dateButtonText}>
+          {date ? date.toISOString().split("T")[0] : "Select Date"} {/* Show "Select Date" if blank */}
+          </Text>
+          <Icon
+            name="calendar-outline"
+            size={20}
+            color="#000"
+            style={styles.icon}
+          />
+        </View>
+      </View>
       {showPicker && (
-        <DateTimePicker mode="single" date={date} onChange={handleDateChange} />
+        <DateTimePicker mode="single" date={date || new Date()} onChange={handleDateChange} />
       )}
     </TouchableOpacity>
   );
 };
 
+
 export const FilterModal = ({
   modalVisible,
   setModalVisible,
   applyFilter,
-  initialFilters,
-}: {
-  modalVisible: boolean;
-  setModalVisible: (visible: boolean) => void;
-  applyFilter: (filters: any) => void;
-  initialFilters: any;
-}) => {
+  initialFilters}) => {
   const [filters, setFilters] = useState(initialFilters);
-
+  const { navigate } = useNavigation(); 
+  
   useEffect(() => {
     setFilters(initialFilters);
   }, [initialFilters]);
 
-  const handleTabPress = (inHouse: number, approved: number) => {
+  const handleTabPress = (inHouse, approved) => {
     setFilters({ ...filters, inHouse, approved });
   };
 
-  const handleCheckboxChange = (field: string) => {
+  const handleCheckboxChange = (field) => {
     setFilters({ ...filters, [field]: !filters[field] });
   };
 
@@ -80,7 +94,6 @@ export const FilterModal = ({
             <Pressable
               style={[
                 styles.tabButton,
-
                 filters.approved === 0 && styles.activeTab,
               ]}
               onPress={() => handleTabPress(0, 0)}
@@ -156,35 +169,52 @@ export const FilterModal = ({
             checked={filters.cameraSerialNumber}
             onPress={() => handleCheckboxChange("cameraSerialNumber")}
           />
+          <View style={{ display: "flex", flexDirection: "row" }}>
+            <CustomDatePicker
+              label="Start Date:"
+              date={filters.startDate ? new Date(filters.startDate) : new Date()} // Default to a new Date if empty
+              onDateChange={(params) =>
+                setFilters({
+                  ...filters,
+                  startDate: params.date.toISOString().split("T")[0],
+                })
+              }
+            />
 
-          <CustomDatePicker
-            label="Start Date:"
-            date={new Date(filters.startDate)}
-            onDateChange={(params) =>
-              setFilters({
-                ...filters,
-                startDate: params.date.toISOString().split("T")[0],
-              })
-            }
-          />
-
-          <CustomDatePicker
-            label="End Date:"
-            date={new Date(filters.endDate)}
-            onDateChange={(params) =>
-              setFilters({
-                ...filters,
-                endDate: params.date.toISOString().split("T")[0],
-              })
-            }
-          />
-
-          <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-            onPress={handleApply}
-          >
-            <Text style={styles.buttonText}>Apply</Text>
-          </Pressable>
+            <CustomDatePicker
+              label="End Date:"
+              date={filters.endDate ? new Date(filters.endDate) : new Date()} // Default to a new Date if empty
+              onDateChange={(params) =>
+                setFilters({
+                  ...filters,
+                  endDate: params.date.toISOString().split("T")[0],
+                })
+              }
+            />
+          </View>
+          <View style={{ display: "flex", flexDirection: "row" }}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.pressed,
+                { marginRight: 10 },
+                { flex: 1 }, // Ensure both buttons take equal space
+              ]}
+              onPress={() => setModalVisible(false)} // Correct cancel behavior
+            >
+              <Text style={styles.buttonText}>CANCEL</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                pressed && styles.pressed,
+                { flex: 1 },
+              ]}
+              onPress={handleApply}
+            >
+              <Text style={styles.buttonText}>APPLY</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </Modal>
@@ -241,5 +271,22 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8,
+  },
+  datePickerContainer: {
+    padding: 10,
+    width: "50%",
+  },
+  datePickerWrapper: {
+    flexDirection: "row", // Align text and icon in a row
+    alignItems: "center", // Vertically center the text and icon
+    borderColor: GlobalAppColor.AppGrey,
+    justifyContent: "space-between", // Align text to the left and icon to the right
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  icon: {
+    marginLeft: 10, // Add space between the text and the icon
   },
 });

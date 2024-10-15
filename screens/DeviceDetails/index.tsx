@@ -6,15 +6,20 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   View,
 } from "react-native";
 import { GlobalAppColor, GlobalFont, GlobalStyle } from "../../CONST";
 import { CustomTextInput } from "../../components/CustomTextInput";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { PopUpModal } from "../../components/PopUp";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useRoute } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { DropdownComponent } from "../../components/Spinner";
 import { btoa } from "react-native-quick-base64";
 import {
@@ -26,6 +31,7 @@ import {
 } from "../../utils";
 import { CameraCompo } from "./camera";
 import Toast from "react-native-toast-message";
+import { RouteNames } from "../../navigation/routesNames";
 
 export const DeviceDetails = () => {
   const route = useRoute();
@@ -84,6 +90,7 @@ export const DeviceDetails = () => {
   const [modalval, setModalval] = useState("");
   const [inhouse, setInhouse] = useState("");
   const [admin, setAdmin] = useState("");
+  const [errors, setErrors] = useState({});
 
   const DeviceSchema = Yup.object().shape({
     invoiceNumber: Yup.string(),
@@ -127,239 +134,85 @@ export const DeviceDetails = () => {
     },
   });
 
-  // const createProduct = async () => {
-  //   let productNoString = primaryInfo["PRODUCT NO"]; // The string
-  //   let productNoArray = productNoString.split(",");
+  console.log("pindex", primaryInfo["PRODUCT NO"]);
+  console.log("type -----   ", QR_STSTEM_TYPE);
 
-  //   const token = await getUserToken();
-  //   const userData = await getUserData();
-  //   const dObject = {
-  //     authorization: token,
-  //     input: {
-  //       p_index: productNoArray, // Assuming this is an array data
-  //       qr_string: data,
-  //       invoice_number:
-  //         invoice.toUpperCase() +
-  //         "$" +
-  //         hdd["validity"] +
-  //         " " +
-  //         hdd["id"] +
-  //         "$" +
-  //         gu["validity"] +
-  //         " " +
-  //         gu["id"],
-  //       purchase_number: poid,
-  //       machine_name: machine,
-  //       model_number: hdd["id"] + "-" + modalval,
-  //       company_name: comName,
-  //       ipc_service_tag: computerInfo.label + "\r\n" + modalval,
-  //       io_service_number:
-  //         ioInfo +
-  //         "\n" +
-  //         inputval +
-  //         "\n" +
-  //         outputval +
-  //         "\n" +
-  //         primaryInfo.MACHINE,
-  //       lens_info: "",
-  //       setup_version: formik.values.setupverion.toString(),
-  //       engineer_id: uid,
-  //       qc_id: "2",
-  //       remark: remark,
-  //       key: key,
-  //       in_house_flag: "0",
-  //       location: comLoc,
-  //       changed_json: parsedResult["SECONDARY INFO"],
-  //       uni_casting_admin: null,
-  //       camera_serial_number: camSerialInfo,
-  //     },
-  //   };
-
-  //   console.log(dObject);
-
-  //   const encodedData = btoa(JSON.stringify(dObject));
-  //   const finalData = { data: encodedData };
-
-  //   try {
-  //     const response = await fetch(
-  //       "https://hum.ujn.mybluehostin.me/span/v1/addproduct.php",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(finalData),
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       throw new Error("Network response was not ok");
-  //     }
-
-  //     const result = await response.json();
-  //     // If the response indicates success, show an alert
-  //     if (result.success) {
-  //       // Adjust based on the response structure
-  //       Alert.alert("Success", "Product has been created successfully!");
-  //     } else {
-  //       Alert.alert("Error", "Failed to create product. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error creating product:", error);
-  //     Alert.alert("Error", "An error occurred while creating the product.");
-  //   }
-  // };
-
+  const navigatation = useNavigation();
   const createProduct = async () => {
-    if (QR_STSTEM_TYPE == "In House") {
-      setInhouse("1");
-    } else {
-      setInhouse("0");
-    }
-    console.log(QR_STSTEM_TYPE)
-    if (QR_STSTEM_TYPE != "In House") {
-      if (
-        !invoice ||
-        !hdd["validity"] ||
-        !hdd["id"] ||
-        !gu["validity"] ||
-        !gu["id"] ||
-        !poid ||
-        !machine ||
-        !modalval ||
-        !comName ||
-        !computerInfo.label ||
-        !inputval ||
-        !outputval ||
-        !primaryInfo.MACHINE ||
-        !formik.values.setupversion ||
-        !remark ||
-        !comLoc ||
-        !camSerialInfo
-      ) {
-        Alert.alert("Validation Error", "All fields must be filled out.");
-        return; // Stop the function if validation fails
+    // Determine the inhouse flag based on QR_STSTEM_TYPE
+    setInhouse(JSON.parse(QR_STSTEM_TYPE) === "In House" ? "1" : "0");
+    console.log(inhouse);
+    if (inhouse === "0") {
+      const newErrors = {};
+    
+      // Validate company name and location
+      console.log("comName", comName);
+      if (!comName) {
+        newErrors.comName = "Company Name Is Required.";
+      } else if (!comLoc) {
+        newErrors.comLoc = "Company Location Is Required.";
+      }
+    
+      // Validate computer info
+      else if (!computerInfo.label) {
+        newErrors.computerInfo = "Computer Info Must Be Selected.";
+        console.log(newErrors.computerInfo);
+      } else if (!modalval) {
+        newErrors.modalval = "Computer Service Number Must Be Selected.";
+        console.log(newErrors.modalval);
+      } else if (!ioInfo) {
+        newErrors.ioInfo = "IO Info Must Be Filled Out.";
+      } else if (ioInfo && layouts) {
+        if (!inputval) {
+          newErrors.inputval = "Input Value Must Be Filled Out.";
+        } else if (!outputval) {
+          newErrors.outputval = "Output Value Must Be Filled Out.";
+        } else if (!primaryInfo.MACHINE) {
+          newErrors.primaryInfo = newErrors.primaryInfo || {};
+          newErrors.primaryInfo.MACHINE = "Mac ID Must Be Filled Out.";
+        }
+      }
+    
+      // Validate remark and setup version
+      if (remark === "") {
+        newErrors.remark = "Work Order Must Be Filled Out.";
+        console.log("error", remark);
+      }
+      if (!formik.values.setupversion) {
+        newErrors.setupversion = "Setup Version Must Be Filled Out.";
+        console.log("error", formik.values.setupversion);
+      }else if(formik.values.setupversion){
+        const dotCount = (
+          formik.values.setupversion.match(/\./g) || []
+        ).length;
+        if(dotCount != 3){
+          newErrors.setupversion = "Setup Version Must Be contain 3 dots";
+        }
+      }else if (!camSerialInfo) {
+        newErrors.camSerialInfo = "Camera Serial Number Must Be Filled Out.";
+      } else if (Array.isArray(camSerialInfo)) {
+        for (let i = 0; i < camSerialInfo.length; i++) {
+          if (!camSerialInfo[i].model) {
+            newErrors.camSerialInfo = newErrors.camSerialInfo || {};
+            newErrors.camSerialInfo[`model${i + 1}`] = `Camera Model ${i + 1} Must Be Selected.`;
+          }
+          if (!camSerialInfo[i].lens) {
+            newErrors.camSerialInfo = newErrors.camSerialInfo || {};
+            newErrors.camSerialInfo[`lens${i + 1}`] = `Lens ${i + 1} Must Be Selected.`;
+          }
+        }
+      }
+    
+      // Set the errors to display under the respective fields
+      setErrors(newErrors);
+    
+      // If any errors exist, stop the function execution
+      if (Object.keys(newErrors).length > 0) {
+        console.log("Validation errors:", newErrors);
+        return;
       }
     }
-
-    // Perform validation first for individual fields
-    // if (!primaryInfo["PRODUCT NO"]) {
-    //   Alert.alert("Validation Error", "Product No must be filled out.");
-    //   return;
-    // }
-    // if (!invoice) {
-    //   Alert.alert("Validation Error", "Invoice must be filled out.");
-    //   return;
-    // }
-    // if (!hdd["validity"]) {
-    //   Alert.alert("Validation Error", "HDD validity must be filled out.");
-    //   return;
-    // }
-    // if (!hdd["id"]) {
-    //   Alert.alert("Validation Error", "HDD ID must be filled out.");
-    //   return;
-    // }
-    // if (!gu["validity"]) {
-    //   Alert.alert("Validation Error", "GU validity must be filled out.");
-    //   return;
-    // }
-    // if (!gu["id"]) {
-    //   Alert.alert("Validation Error", "GU ID must be filled out.");
-    //   return;
-    // }
-    // if (!poid) {
-    //   Alert.alert("Validation Error", "Purchase Number must be filled out.");
-    //   return;
-    // }
-    // if (!machine) {
-    //   Alert.alert("Validation Error", "Machine Name must be filled out.");
-    //   return;
-    // }
-
-    // if (!comName) {
-    //   Alert.alert("Validation Error", "Company Name must be filled out.");
-    //   return;
-    // }
-    // if (!comLoc) {
-    //   Alert.alert("Validation Error", "Company Location must be filled out.");
-    //   return;
-    // }
-    // if (!computerInfo.label) {
-    //   Alert.alert("Validation Error", "Computer Info must be selected.");
-    //   return;
-    // }
-    // if (!modalval) {
-    //   Alert.alert(
-    //     "Validation Error",
-    //     "Computer Service Number must be filled out."
-    //   );
-    //   return;
-    // }
-    // if (!ioInfo) {
-    //   Alert.alert(
-    //     "Validation Error",
-    //     "Computer Service Number must be filled out."
-    //   );
-    //   return;
-    // }
-    // if (ioInfo && layouts) {
-    //   if (!inputval) {
-    //     Alert.alert("Validation Error", "Input Value must be filled out.");
-    //     return;
-    //   }
-    //   if (!outputval) {
-    //     Alert.alert("Validation Error", "Output Value must be filled out.");
-    //     return;
-    //   }
-    //   if (!primaryInfo.MACHINE) {
-    //     Alert.alert("Validation Error", "Mac Id must be filled out.");
-    //     return;
-    //   }
-    // }
-    // console.log(camSerialInfo);
-    // if (!camSerialInfo) {
-    //   Alert.alert(
-    //     "Validation Error",
-    //     "Camera Serial Number must be filled out."
-    //   );
-    //   return;
-    // }
-    // if (camSerialInfo && Array.isArray(camSerialInfo)) {
-    //   for (let i = 0; i < camSerialInfo.length; i++) {
-    //     if (!camSerialInfo[i].model) {
-    //       Alert.alert("Validation Error", `Camera model ${i + 1} must be selected.`);
-    //       return;
-    //     }
-    //     if (!camSerialInfo[i].lens) {
-    //       Alert.alert("Validation Error", `Lens ${i + 1} must be selected.`);
-    //       return;
-    //     }
-    //   }
-    // }
-
-    // if (!remark) {
-    //   Alert.alert("Validation Error", "Work Order must be filled out.");
-    //   return;
-    // }
-    // if (!formik.values.setupversion) {
-    //   Alert.alert("Validation Error", "Setup Version must be filled out.");
-    //   return;
-    // }
-    // if (!uid) {
-    //   Alert.alert("Validation Error", "Engineer ID must be filled out.");
-    //   return;
-    // }
-
-    // if (!key) {
-    //   Alert.alert("Validation Error", "Key must be filled out.");
-    //   return;
-    // }
-
-    // if (!parsedResult["SECONDARY INFO"]) {
-    //   Alert.alert("Validation Error", "Secondary Info must be filled out.");
-    //   return;
-    // }
-
+    
     let productNoString = primaryInfo["PRODUCT NO"];
     let productNoArray = productNoString.split(",");
 
@@ -384,7 +237,7 @@ export const DeviceDetails = () => {
         purchase_number: poid,
         machine_name: machine,
         model_number: hdd["id"] + "-" + modalval,
-        company_name: comName,
+        company_name: inhouse === "1" ? "SPAN" : comName,
         ipc_service_tag: computerInfo.label + "\r\n" + modalval,
         io_service_number:
           ioInfo +
@@ -395,21 +248,23 @@ export const DeviceDetails = () => {
           "\n" +
           primaryInfo.MACHINE,
         lens_info: "",
-        setup_version: formik.values.setupversion.toString(), // Typo corrected
+        setup_version: formik.values.setupversion,
         engineer_id: uid,
         qc_id: QR_STSTEM_ADMIN,
         remark: remark,
         key: key,
         in_house_flag: inhouse,
-        location: comLoc,
+        location: inhouse === "1" ? "AHMEDABAD" : comLoc,
         changed_json: parsedResult["SECONDARY INFO"],
-        uni_casting_admin: null,
+        uni_casting_admin: QR_STSTEM_ADMIN,
         camera_serial_number: camSerialInfo,
       },
     };
-
     const encodedData = btoa(JSON.stringify(dObject));
     const finalData = { data: encodedData };
+    console.log(remark);
+    console.log(formik.values.setupversion);
+
 
     try {
       const response = await fetch(
@@ -424,13 +279,25 @@ export const DeviceDetails = () => {
       );
 
       if (!response.ok) {
+        console.log("network");
         throw new Error("Network response was not ok");
       }
 
       const result = await response.json();
-
-      if (result.success) {
-        Alert.alert("Success", "Product has been created successfully!");
+      console.log("result done", result);
+      if (result.data === true) {
+        setModalVisible(true);
+        // Reset form fields
+        setModalval("");
+        setComName("");
+        setComputerInfo("");
+        setIoInfo("");
+        setInputval("");
+        setOutputval("");
+        setUid("");
+        setRemark("");
+        setComLoc("");
+        setCamSerialInfo("");
       } else {
         Alert.alert("Error", "Failed to create product. Please try again.");
       }
@@ -485,8 +352,8 @@ export const DeviceDetails = () => {
         value: item.id,
       }))
     );
-    // //console.log("my results ----- company lens info --  ",lensData);
-    // //console.log("my results ----- company lens info --  ",result.data.additional_data.mast_comp_lens_serial);
+    //console.log("my results ----- company lens info --  ",lensData);
+    // console.log("my results ----- company lens info -- ", JSON.stringify(result.data.additional_data, null, 2));
     const invoiceData = result.data?.latest_products?.map(
       (product: MachineRecord) => {
         const inid = product.invoice_number.split(" ");
@@ -526,11 +393,19 @@ export const DeviceDetails = () => {
     setQR_SYSTEM_TYPE(QR_STSYEM_TYPEs);
   };
 
-  useEffect(() => {
-    getProductList();
-    userData();
-    getSystemAndAdminData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      getProductList();
+      userData();
+      getSystemAndAdminData();
+    }, [])
+  );
+
+  // useEffect(() => {
+  //   getProductList();
+  //   userData();
+  //   getSystemAndAdminData();
+  // }, []);
 
   return (
     <>
@@ -638,7 +513,7 @@ export const DeviceDetails = () => {
                 <View style={{ width: "auto", display: "flex", flex: 1 }}>
                   <CustomTextInput
                     inputType="Text"
-                    placeholder="Enter Purchase No"
+                    placeholder=""
                     value={modalval}
                     editable={false}
                   />
@@ -659,6 +534,7 @@ export const DeviceDetails = () => {
               <View
                 style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
               >
+                {/* <Text>{JSON.parse(QR_STSTEM_TYPE)}</Text> */}
                 {/* <CustomTextInput
                   inputType="Text"
                   placeholder="Enter Company Name"
@@ -673,7 +549,9 @@ export const DeviceDetails = () => {
                   inputContainerStyle={{
                     backgroundColor: GlobalAppColor.White,
                   }}
-                  value={comName}
+                  errorMessage={errors.comName}
+                  value={QR_STSTEM_TYPE === '"In House"' ? "SPAN" : comName}
+                  editable={QR_STSTEM_TYPE === '"In House"' ? false : true}
                   onChange={(event) => {
                     event.persist(); // Persist the event to avoid it being reused
                     setComName(event.nativeEvent.text); // Use the text from nativeEvent if you need more control
@@ -695,331 +573,383 @@ export const DeviceDetails = () => {
                   inputContainerStyle={{
                     backgroundColor: GlobalAppColor.White,
                   }}
-                  value={comLoc}
+                  value={QR_STSTEM_TYPE === '"In House"' ? "AHMEDABAD" : comLoc}
+                  editable={QR_STSTEM_TYPE === '"In House"' ? false : true}
                   onChange={(event) => {
                     event.persist(); // Persist the event to avoid it being reused
                     setComLoc(event.nativeEvent.text); // Use the text from nativeEvent if you need more control
                   }}
+                  errorMessage={errors.comLoc}
                 />
               </View>
             </View>
-            <View
-              style={{ display: "flex", flexDirection: "column", rowGap: 5 }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                Computer Info:
-              </Text>
-              <View
-                style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
-              >
-                {/* <CustomTextInput
+            {QR_STSTEM_TYPE != '"In House"' && (
+              <>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
+                  }}
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    Computer Info:
+                  </Text>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      rowGap: 8,
+                    }}
+                  >
+                    {/* <CustomTextInput
                   inputType="Text"
                   placeholder=""
                   inputContainerStyle={{
                     backgroundColor: GlobalAppColor.AppWhite,
                   }}
                 /> */}
-                <DropdownComponent
-                  data={companyData}
-                  subtitle={"Select Item"}
-                  onChange={(Text) => {
-                    setComputerInfo(Text);
-                  }}
-                />
-                <CustomTextInput
-                  inputType="Text"
-                  placeholder="Enter Service No"
-                  inputContainerStyle={{
-                    backgroundColor: GlobalAppColor.White,
-                  }}
-                  onChangeText={(text) => {
-                    setModalval(text);
-                  }}
-                />
-              </View>
-            </View>
+                    <DropdownComponent
+                      data={companyData}
+                      subtitle={"Select Item"}
+                      onChange={(Text) => {
+                        setComputerInfo(Text);
+                      }}
+                      errorMessage={errors.computerInfo}
+                    />
+                    <CustomTextInput
+                      inputType="Text"
+                      placeholder="Enter Service No"
+                      inputContainerStyle={{
+                        backgroundColor: GlobalAppColor.White,
+                      }}
+                      onChangeText={(text) => {
+                        setModalval(text);
+                      }}
+                      errorMessage={errors.modalval}
+                    />
+                  </View>
+                </View>
 
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                rowGap: 5,
-              }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                I/O Info:
-              </Text>
-              {/* <CustomTextInput
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
+                  }}
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    I/O Info:
+                  </Text>
+                  {/* <CustomTextInput
                 inputType="Text"
                 placeholder=""
                 inputContainerStyle={{
                   backgroundColor: GlobalAppColor.AppWhite,
                 }}
               /> */}
-              <DropdownComponent
-                data={ioData}
-                subtitle={"Select Item"}
-                onChange={(item) => {
-                  //console.log(item.label);
-                  const val = item.label;
-                  if (val.includes("COGNEX")) {
-                    setLayouts(false);
-                  } else if (val.includes("BECKHOFF")) {
-                    setLayouts(true);
-                  } else {
-                    setLayouts(false);
-                  }
-                  setIoInfo(item.label);
-                  // setIsFocus(false);
-                }}
-              />
-              {layouts && (
-                <>
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      flexWrap: "nowrap",
-                      columnGap: 7,
-                      // flex: 1,
+                  <DropdownComponent
+                    data={ioData}
+                    subtitle={"Select Item"}
+                    onChange={(item) => {
+                      //console.log(item.label);
+                      const val = item.label;
+                      if (val.includes("COGNEX")) {
+                        setLayouts(false);
+                      } else if (val.includes("BECKHOFF")) {
+                        setLayouts(true);
+                      } else {
+                        setLayouts(false);
+                      }
+                      setIoInfo(item.label);
                     }}
-                  >
-                    <View
-                      style={{ width: "auto", display: "flex", flex: 1 / 2 }}
-                    >
-                      <CustomTextInput
-                        inputType="Text"
-                        value="INPUT"
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.InputBackGround,
-                          borderColor: "#BEC3CC",
-                        }}
-                        editable={false}
-                      />
-                    </View>
-                    <View style={{ width: "auto", display: "flex", flex: 1 }}>
-                      <CustomTextInput
-                        inputType="Text"
-                        placeholder=""
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.AppWhite,
-                          borderColor: "#BEC3CC",
-                        }}
-                        value={inputval} // Ensure this is the field name you defined in formik's initial values
-                        onChangeText={(text) => {
-                          setInputval(text); // Pass the raw text value
-                        }}
-                      />
-                    </View>
-                  </View>
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      flexWrap: "nowrap",
-                      columnGap: 7,
-                      // flex: 1,
-                    }}
-                  >
-                    <View
-                      style={{ width: "auto", display: "flex", flex: 1 / 2 }}
-                    >
-                      <CustomTextInput
-                        inputType="Text"
-                        value="OUTPUT"
-                        editable={false}
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.InputBackGround,
-                          borderColor: "#BEC3CC",
-                        }}
-                      />
-                    </View>
-                    <View style={{ width: "auto", display: "flex", flex: 1 }}>
-                      <CustomTextInput
-                        inputType="Text"
-                        placeholder=""
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.AppWhite,
-                          borderColor: "#BEC3CC",
-                        }}
-                        value={outputval}
-                        onChangeText={(text) => {
-                          setOutputval(text); // Pass the raw text value
-                        }}
-                      />
-                    </View>
-                  </View>
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      flexWrap: "nowrap",
-                      columnGap: 7,
-                      // flex: 1,
-                    }}
-                  >
-                    <View
-                      style={{ width: "auto", display: "flex", flex: 1 / 2 }}
-                    >
-                      <CustomTextInput
-                        inputType="Text"
-                        value="MAC ID"
-                        editable={false}
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.InputBackGround,
-                          borderColor: "#BEC3CC",
-                        }}
-                      />
-                    </View>
-                    <View style={{ width: "auto", display: "flex", flex: 1 }}>
-                      <CustomTextInput
-                        inputType="Text"
-                        placeholder={primaryInfo.MACHINE}
-                        inputContainerStyle={{
-                          backgroundColor: GlobalAppColor.AppWhite,
-                          borderColor: "#BEC3CC",
-                        }}
-                        editable={false}
-                        value={formik.values.macid}
-                        onChange={(text) => formik.setFieldValue("macid", text)}
-                      />
-                    </View>
-                  </View>
-                </>
-              )}
-            </View>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                rowGap: 5,
-              }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                Camera Info:
-              </Text>
-              {primaryInfo.CAMERAS.length > 0 &&
-                cameraData.length > 0 &&
-                lensData.length > 0 &&
-                allData.length > 0 && (
-                  <CameraCompo
-                    data={primaryInfo.CAMERAS}
-                    cameraData={cameraData}
-                    lensData={lensData}
-                    allData={allData}
-                    parentCallBack={handleCallback}
+                    errorMessage={errors.ioInfo}
                   />
-                )}
-            </View>
-            <View
-              style={{ display: "flex", flexDirection: "column", rowGap: 5 }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                Work Order:
-              </Text>
-              <View
-                style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
-              >
-                <CustomTextInput
-                  inputType="Text"
-                  placeholder="Enter Work Order"
-                  inputContainerStyle={{
-                    backgroundColor: GlobalAppColor.White,
+                  {layouts && (
+                    <>
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          flexWrap: "nowrap",
+                          columnGap: 7,
+                          // flex: 1,
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: "auto",
+                            display: "flex",
+                            flex: 1 / 2,
+                          }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            value="INPUT"
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.InputBackGround,
+                              borderColor: "#BEC3CC",
+                            }}
+                            editable={false}
+                          />
+                        </View>
+                        <View
+                          style={{ width: "auto", display: "flex", flex: 1 }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            placeholder=""
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.AppWhite,
+                              borderColor: "#BEC3CC",
+                            }}
+                            value={inputval} // Ensure this is the field name you defined in formik's initial values
+                            onChangeText={(text) => {
+                              setInputval(text); // Pass the raw text value
+                            }}
+                            errorMessage={errors.inputval}
+                          />
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          flexWrap: "nowrap",
+                          columnGap: 7,
+                          // flex: 1,
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: "auto",
+                            display: "flex",
+                            flex: 1 / 2,
+                          }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            value="OUTPUT"
+                            editable={false}
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.InputBackGround,
+                              borderColor: "#BEC3CC",
+                            }}
+                          />
+                        </View>
+                        <View
+                          style={{ width: "auto", display: "flex", flex: 1 }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            placeholder=""
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.AppWhite,
+                              borderColor: "#BEC3CC",
+                            }}
+                            value={outputval}
+                            onChangeText={(text) => {
+                              setOutputval(text); // Pass the raw text value
+                            }}
+                            errorMessage={errors.outputval}
+                          />
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          flexWrap: "nowrap",
+                          columnGap: 7,
+                          // flex: 1,
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: "auto",
+                            display: "flex",
+                            flex: 1 / 2,
+                          }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            value="MAC ID"
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.InputBackGround,
+                              borderColor: "#BEC3CC",
+                            }}
+                          />
+                        </View>
+                        <View
+                          style={{ width: "auto", display: "flex", flex: 1 }}
+                        >
+                          <CustomTextInput
+                            inputType="Text"
+                            inputContainerStyle={{
+                              backgroundColor: GlobalAppColor.AppWhite,
+                              borderColor: "#BEC3CC",
+                            }}
+                            editable={true}
+                            value={formik.values.macid}
+                            onChange={(text) =>
+                              formik.setFieldValue("macid", text)
+                            }
+                            // errorMessage={errors.primaryInfo.MACHINE}
+                          />
+                        </View>
+                      </View>
+                    </>
+                  )}
+                </View>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
                   }}
-                  value={remark}
-                  onChange={(Text) => {
-                    setRemark(Text);
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    Camera Info:
+                  </Text>
+                  {primaryInfo.CAMERAS.length > 0 &&
+                    cameraData.length > 0 &&
+                    lensData.length > 0 &&
+                    allData.length > 0 && (
+                      <CameraCompo
+                        data={primaryInfo.CAMERAS}
+                        cameraData={cameraData}
+                        lensData={lensData}
+                        allData={allData}
+                        parentCallBack={handleCallback}
+                        errors={errors}
+                      />
+                    )}
+                </View>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
                   }}
-                />
-              </View>
-            </View>
-            <View
-              style={{ display: "flex", flexDirection: "column", rowGap: 5 }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                Setup Version:
-              </Text>
-              <View
-                style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
-              >
-                {/* <CustomTextInput
-                  inputType="Text"
-                  placeholder=""
-                  inputContainerStyle={{
-                    backgroundColor: GlobalAppColor.AppWhite,
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    Work Order:
+                  </Text>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      rowGap: 8,
+                    }}
+                  >
+                    <CustomTextInput
+                      inputType="Text"
+                      placeholder="Enter Work Order"
+                      inputContainerStyle={{
+                        backgroundColor: GlobalAppColor.White,
+                      }}
+                      value={remark}
+                      onChangeText={(text) => {
+                        setRemark(text); // Pass the raw text value
+                      }}
+                      errorMessage={errors.remark}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
                   }}
-                  value={formik.values.setupverion}
-                  onChange={(Text) => {
-                    formik.setFieldValue("setupverion", Text);
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    Setup Version:
+                  </Text>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      rowGap: 8,
+                    }}
+                  >
+                    <CustomTextInput
+                      inputType="Text"
+                      placeholder="Setup version"
+                      inputContainerStyle={{
+                        backgroundColor: GlobalAppColor.White,
+                      }}
+                      value={formik.values.setupversion} // Corrected typo
+                      onChangeText={(text) => {
+                        formik.setFieldValue("setupversion", text);
+                      }}
+                      onBlur={() => {
+                        const dotCount = (
+                          formik.values.setupversion.match(/\./g) || []
+                        ).length;
+                        if (dotCount !== 3) {
+                          Alert.alert(
+                            "Invalid Input",
+                            "Value must contain three dots."
+                          );
+                        }
+                      }}
+                      errorMessage={errors.setupversion}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    rowGap: 5,
                   }}
-                /> */}
-
-                <CustomTextInput
-                  inputType="Text"
-                  placeholder="Setup version"
-                  inputContainerStyle={{
-                    backgroundColor: GlobalAppColor.White,
-                  }}
-                  value={formik.values.setupversion} // Corrected typo
-                  onChangeText={(text) => {
-                    formik.setFieldValue("setupversion", text);
-                  }}
-                  onBlur={() => {
-                    const dotCount = (
-                      formik.values.setupversion.match(/\./g) || []
-                    ).length;
-                    if (dotCount !== 3) {
-                      Alert.alert(
-                        "Invalid Input",
-                        "Value must contain three dots."
-                      );
-                    }
-                  }}
-                />
-              </View>
-            </View>
-            <View
-              style={{ display: "flex", flexDirection: "column", rowGap: 5 }}
-            >
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 14, lineHeight: 25 },
-                ]}
-              >
-                Engineer Name:
-              </Text>
-              <View
-                style={{ display: "flex", flexDirection: "column", rowGap: 8 }}
-              >
-                <CustomTextInput inputType="Text" placeholder={name} />
-              </View>
-            </View>
+                >
+                  <Text
+                    style={[
+                      GlobalStyle.TextStyle500_25_16,
+                      { fontSize: 14, lineHeight: 25 },
+                    ]}
+                  >
+                    Engineer Name:
+                  </Text>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      rowGap: 8,
+                    }}
+                  >
+                    <CustomTextInput inputType="Text" value={name} editable={false}/>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         </ScrollView>
         <View

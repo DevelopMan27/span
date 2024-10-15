@@ -22,8 +22,8 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
 include(ExternalProject)
 ExternalProject_Add(json-populate
                      "UPDATE_DISCONNECTED" "False" "GIT_REPOSITORY" "https://github.com/nlohmann/json.git" "GIT_TAG" "v3.11.3"
-                    SOURCE_DIR          "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86/_deps/json-src"
-                    BINARY_DIR          "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/x86/_deps/json-build"
+                    SOURCE_DIR          "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86/_deps/json-src"
+                    BINARY_DIR          "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/x86/_deps/json-build"
                     CONFIGURE_COMMAND   ""
                     BUILD_COMMAND       ""
                     INSTALL_COMMAND     ""

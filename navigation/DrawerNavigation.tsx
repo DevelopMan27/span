@@ -24,7 +24,7 @@ import { IO_serial_number } from "../screens/IO_serial_number";
 import { IPC_service_tag } from "../screens/IPC_service_tag";
 import { Lens_info } from "../screens/Lens_info";
 import { Comp_lens_serial } from "../screens/Comp_lens_serial";
-import LicenseStackNavigator from "./LicenseStack";
+import { Announcement } from "../screens/Announcement";
 
 const Drawer = createDrawerNavigator();
 
@@ -169,7 +169,7 @@ const DrawerNavigation = () => {
             ),
           }}
         />
-        {/* <Drawer.Screen
+        <Drawer.Screen
           name="License"
           component={License}
           options={{
@@ -198,16 +198,6 @@ const DrawerNavigation = () => {
                 color={GlobalAppColor.White}
               />
             ),
-          }}
-        /> */}
-        <Drawer.Screen
-          name="LicenseStack"
-          component={LicenseStackNavigator}
-          options={{
-            title: "License",
-            sceneContainerStyle: {
-              backgroundColor: GlobalAppColor.AppWhite,
-            },
           }}
         />
         <Drawer.Screen
@@ -259,6 +249,48 @@ const DrawerNavigation = () => {
         <Drawer.Screen
           name="NotificationList"
           component={NotificationList}
+          options={{
+            sceneContainerStyle: {
+              backgroundColor: GlobalAppColor.AppWhite,
+            },
+            headerTitleAlign: "center",
+            headerTitleStyle: {
+              textAlign: "center",
+              alignSelf: "center",
+              alignContent: "center",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            headerTitle: (props) => (
+              <Image
+                style={{ width: 88, height: 30 }}
+                source={require("../assets/Logo.png")}
+              />
+            ),
+            headerRight: (props) => (
+              <MaterialCommunityIcons
+                name="bell-badge"
+                size={24}
+                style={{ marginRight: 22 }}
+                color={GlobalAppColor.White}
+              />
+            ),
+            headerLeft: (props) => (
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={24}
+                onPress={() => {
+                  goBack();
+                }}
+                style={{ marginLeft: 12 }}
+                color={GlobalAppColor.White}
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Announcement"
+          component={Announcement}
           options={{
             sceneContainerStyle: {
               backgroundColor: GlobalAppColor.AppWhite,

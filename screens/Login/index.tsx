@@ -26,20 +26,15 @@ import debounce from "lodash.debounce";
 
 export const Login = () => {
   const { navigate } = useNavigation();
-  const [confirm, setConfirm] = useState<
-    FirebaseAuthTypes.ConfirmationResult | undefined
-  >(undefined);
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult>();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const debouncedSubmit = () => {
-    setLoading(true);
-    loginUser();
-  };
-
-  const loginUser = debounce(() => {
+  const debouncedSubmit = debounce(() => {
     formik.handleSubmit();
-  }, 1000); // 1000ms debounce
+  }, 0); // 1000ms debounce
 
   async function confirmCode(code) {
     try {
@@ -56,7 +51,6 @@ export const Login = () => {
       setConfirm(confirmation);
       setLoading(false);
     } catch (error) {
-      console.log("Errorrrr", error);
       Alert.alert("Error", JSON.stringify(error));
       //console.log("Error", error);
     }
@@ -79,24 +73,37 @@ export const Login = () => {
       otp: 0,
     },
     onSubmit: async (values) => {
-      setLoading(true);
-
-      const updatedNumber = addCountryCode(values.mobile);
-      // checkUser(values.mobile);
-      const user = await checkUser(removeCountryCode(values.mobile));
-      console.log("user", user.success);
-      if (user.success) {
-        // console.log("done")
-        const updatedNumber = addCountryCode(values.mobile);
-        // formik.setFieldValue("mobile", updatedNumber);
-        signInWithPhoneNumber(updatedNumber);
+      const ll = values.mobile.length;
+      if (ll != 10) {
+        setError("Please enter valid mobile number");
       } else {
-        console.log(user);
-        Alert.alert("Error", user.message);
-        setLoading(false);
+        setLoading(true);
+
+        const updatedNumber = addCountryCode(values.mobile);
+        // checkUser(updatedNumber)
+        // const user = checkUser(updatedNumber);
+
+        const user = await checkUser(removeCountryCode(values.mobile));
+
+        // navigate(RouteNames.OTP, {
+        //   confirm: "",
+        //   mobile: formik.values.mobile,
+        // });
+        if (user) {
+          console.log("done")
+          const updatedNumber = addCountryCode(values.mobile);
+          // formik.setFieldValue("mobile", updatedNumber);
+          signInWithPhoneNumber(updatedNumber);
+          // setLoading(false);
+        } else {
+          console.log(user);
+          Alert.alert("Error",user.message);
+          setLoading(false);
+        }
       }
     },
   });
+
   function removeCountryCode(mobileNumber: any) {
     // Remove any leading +91 or 91
     mobileNumber = mobileNumber.replace(/^(\+91|91)/, "");
@@ -104,6 +111,7 @@ export const Login = () => {
     mobileNumber = mobileNumber.trim();
     return mobileNumber;
   }
+
   const checkUser = async (mobile) => {
     const token = "";
     const dObject = {
@@ -126,15 +134,14 @@ export const Login = () => {
         }
       );
       const result = await response.json();
-      console.log(result);
-      console.log(`result.success == false`, result.success == false);
+      // console.log(result);
 
       if (result.success == false) {
-        // Alert.alert("User Not Found", result.message);
+        Alert.alert("User Not Found", result.message);
         setLoading(false);
-        return { success: false, message: result.message };
       } else {
-        return { success: true, message: "DONE" };
+        // console.log
+        return true;
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -216,9 +223,11 @@ export const Login = () => {
                   backgroundColor: GlobalAppColor.AppWhite,
                 }}
                 value={formik.values.mobile}
+                maxLength={10}
                 onChangeText={(text) => {
                   formik.setFieldValue("mobile", text);
                 }}
+                errorMessage={error}
               />
             </View>
             {/* <View

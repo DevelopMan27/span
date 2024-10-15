@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -22,7 +21,7 @@ import { RouteNames } from "../../navigation/routesNames";
 import { useAuthContext } from "../../contexts/UserAuthContext";
 import { btoa, atob } from "react-native-quick-base64";
 import { RegistrationConfirmation } from "../../components/RegistrationConfirmation/index";
-import { getUserToken, storeData } from "../../utils";
+import { storeData } from "../../utils";
 import { useNotificationToken } from "../../hook/useNotificationToken ";
 
 type OTPProps = RouteProp<RootStackParamList, RouteNames.OTP>;
@@ -33,10 +32,10 @@ export const OTP = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const { confirm, designation, email, mobile, name } = route?.params;
   const { token: ExpoToken } = useNotificationToken();
+  const [error, setError] = useState("");
   const LoginSchema = Yup.object().shape({
     otp: Yup.string(),
   });
-  const [loading, setLoading] = useState(false);
   function removeCountryCode(mobileNumber: any) {
     // Remove any leading +91 or 91
     mobileNumber = mobileNumber.replace(/^(\+91|91)/, "");
@@ -44,73 +43,69 @@ export const OTP = () => {
     mobileNumber = mobileNumber.trim();
     return mobileNumber;
   }
-
-
-
   const formik = useFormik({
     validationSchema: LoginSchema,
     initialValues: {
       otp: "",
     },
     onSubmit: async (values) => {
-      setLoading(true)
       try {
+        console.log("values.otp", values.otp);
+        // const confirmation = await confirm.confirm(values.otp);
         let confirmation;
-        //console.log("confirmation_________", confirmation?.additionalUserInfo);
-        //console.log("confirmation_________", confirmation?.user);
-        console.log("====mobile======", mobile);
+        console.log("confirmation_________", confirmation?.additionalUserInfo);
+        console.log("confirmation_________", confirmation?.user);
+
         // Check if user exists by sending a request to the server
         const userExists = await checkUserExists(mobile);
-        console.log("userExists", userExists);
-        if (userExists) {
-          // User exists, attempt login
-          const loginResult = await loginUser(mobile);
-          console.log("loginResult", loginResult);
+        console.log(userExists);
 
-          if (loginResult.success) {
-            confirmation = await confirm.confirm(values.otp);
-            console.log("confirmation", confirmation);
-            //console.log("Login result", loginResult.data);
-            await storeData("USER_DATA", JSON.stringify(loginResult.data));
-            await storeData(
-              "USER_TOKEN",
-              JSON.stringify(loginResult.data.token)
-            );
-            await storeData(
-              "EXPIRY_DATE",
-              JSON.stringify(loginResult.data.eat)
-            );
-            setAPIUSER(true);
-            setLoading(false)
-          } else {
-            Alert.alert("Error while Login", loginResult.message);
-            setLoading(false)
-          }
+        if (values.otp.length != 6) {
+          setError("Please Enter valid OTP");
         } else {
-          // User doesn't exist, proceed with registration
-          if (name && email && designation && confirmation?.user?.uid) {
-            const registrationResult = await registerUser({
-              mobile,
-              name,
-              email,
-              designation,
-              fb_uid: confirmation.user.uid,
-            });
-
-            if (registrationResult.success) {
-              //console.log("==result", registrationResult);
-              setModalVisible(true);
-              setLoading(false)
+          if (userExists) {
+            // User exists, attempt login
+            const loginResult = await loginUser(mobile);
+            if (loginResult.success) {
+              confirmation = await confirm.confirm(values.otp);
+              //console.log("Login result", loginResult.data);
+              await storeData("USER_DATA", JSON.stringify(loginResult.data));
+              await storeData(
+                "USER_TOKEN",
+                JSON.stringify(loginResult.data.token)
+              );
+              await storeData(
+                "EXPIRY_DATE",
+                JSON.stringify(loginResult.data.eat)
+              );
+              setAPIUSER(true);
             } else {
-              Alert.alert("User can't register", registrationResult.message);
-              setLoading(false)
+              Alert.alert("Error while Login", loginResult.message);
+              console.log(loginResult);
+            }
+          } else {
+            // User doesn't exist, proceed with registration
+            if (name && email && designation && confirmation?.user?.uid) {
+              const registrationResult = await registerUser({
+                mobile,
+                name,
+                email,
+                designation,
+                fb_uid: confirmation.user.uid,
+              });
+
+              if (registrationResult.success) {
+                //console.log("==result", registrationResult);
+                setModalVisible(true);
+              } else {
+                Alert.alert("User can't register", registrationResult.message);
+              }
             }
           }
         }
       } catch (error) {
         console.error("Error during OTP verification or user check:", error);
         Alert.alert("Invalid OTP");
-        setLoading(false)
       }
     },
   });
@@ -168,7 +163,7 @@ export const OTP = () => {
       authorization: token,
       input: {
         mobile: mobilenum,
-        Fcm_token: ExpoToken,
+        fcm_token: ExpoToken,
       },
     };
 
@@ -193,7 +188,7 @@ export const OTP = () => {
       // Log the raw response first (you can't read it twice)
       const rawResponse = await response.text();
       //console.log("response-------->", rawResponse);
-      console.log("rawResponse", rawResponse);
+
       // Now parse it as JSON
       const result = JSON.parse(rawResponse);
       //console.log("result________________login", result);
@@ -328,6 +323,7 @@ export const OTP = () => {
                   borderRadius: 8,
                   backgroundColor: GlobalAppColor.AppWhite,
                 }}
+                errorMessage={error}
                 maxLength={6}
                 value={formik.values.otp}
                 onChangeText={(text) => {
@@ -335,45 +331,20 @@ export const OTP = () => {
                 }}
               />
             </View>
-            {/* <View
-              style={{ display: "flex", flexDirection: "column", rowGap: 5 }}
-            >
-              <Text style={[GlobalStyle.TextStyle400_25_16, { fontSize: 14 }]}>
-                OTP
-              </Text>
-              <CustomTextInput
-                inputType="Text"
-                placeholder="Enter your mobile number"
-                keyboardType="phone-pad"
-                inputContainerStyle={{
-                  borderColor: "#D0D5DD",
-                  borderRadius: 8,
-                  backgroundColor: GlobalAppColor.AppWhite,
-                }}
-                value={formik.values.otp}
-                onChangeText={(text) => {
-                  formik.setFieldValue("otp", text);
-                }}
-              />
-            </View> */}
           </View>
           <View style={{ marginTop: 26 }}></View>
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             onPress={() => formik.handleSubmit()}
           >
-            {loading ? (
-              <ActivityIndicator color={GlobalAppColor.AppWhite} />
-            ) : (
-              <Text
-                style={[
-                  GlobalStyle.TextStyle500_25_16,
-                  { fontSize: 16, color: GlobalAppColor.White },
-                ]}
-              >
-                Verify
-              </Text>
-            )}
+            <Text
+              style={[
+                GlobalStyle.TextStyle500_25_16,
+                { fontSize: 16, color: GlobalAppColor.White },
+              ]}
+            >
+              Verify
+            </Text>
           </Pressable>
           <View style={{ marginTop: 15 }}></View>
           <Text

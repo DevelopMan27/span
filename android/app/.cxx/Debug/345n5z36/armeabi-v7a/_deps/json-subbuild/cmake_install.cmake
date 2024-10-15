@@ -1,4 +1,4 @@
-# Install script for directory: /Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild
+# Install script for directory: /Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/armeabi-v7a/_deps/json-subbuild/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

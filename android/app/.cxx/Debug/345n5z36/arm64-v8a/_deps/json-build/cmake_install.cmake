@@ -1,4 +1,4 @@
-# Install script for directory: /Users/apple/Documents/GitHub/span/android/app/.cxx/Debug/345n5z36/arm64-v8a/_deps/json-src
+# Install script for directory: /Users/apple/Downloads/spanguruReactMansi-main done/android/app/.cxx/Debug/345n5z36/arm64-v8a/_deps/json-src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

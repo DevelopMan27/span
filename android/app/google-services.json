@@ -22,14 +22,6 @@
           }
         },
         {
-          "client_id": "480800196676-sll3r4qg9euae0pqh7623q8c8isv1n5k.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.span.app",
-            "certificate_hash": "f5d712b26a3cac2525591289c6c2277a9e3f0197"
-          }
-        },
-        {
           "client_id": "480800196676-tsrc5r9t5haeqgjqk534df9umqj1ii9g.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

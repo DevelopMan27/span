@@ -33,7 +33,7 @@ export const PopUpModal = ({
           <Text
             style={[
               GlobalStyle.TextStyle500_25_16,
-              { fontSize: 16, lineHeight: 25, color: "#727272" },
+              { fontSize: 14, lineHeight: 25, color: "#727272" },
             ]}
           >
             Licence Request submitted successfully
@@ -41,7 +41,7 @@ export const PopUpModal = ({
           <Text
             style={[
               GlobalStyle.TextStyle500_25_16,
-              { fontSize: 16, lineHeight: 25, color: "#727272" },
+              { fontSize: 14, lineHeight: 25, color: "#727272" },
             ]}
           >
             Please wait for admin approval
@@ -54,7 +54,7 @@ export const PopUpModal = ({
             ]}
             onPress={() => {
               setModalVisible(false);
-              navigate("License");
+              navigate("HomeScreen");
             }}
           >
             <Text

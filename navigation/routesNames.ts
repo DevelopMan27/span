@@ -6,10 +6,10 @@ export enum RouteNames {
   Login = "Login",
   Register = "Register",
   OTP = "OTP",
+  Announcement = "Announcement",
   LicenseDetails = "LicenseDetails",
   NotificationList = "NotificationList",
   License = "License",
-  LicenseStack = "LicenseStack",
   UserList = "UserList",
   UserDetails = "UserDetails",
   Parts = "Parts",
@@ -20,5 +20,5 @@ export enum RouteNames {
   Lens_info = "Lens_info",
   Comp_lens_serial = "Comp_lens_serial",
   UserProfile = "UserProfile",
-  Splash = "Splash"
+  SplashScreen = "Splash"
 }

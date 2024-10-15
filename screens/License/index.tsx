@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { GlobalAppColor } from "../../CONST";
@@ -19,21 +20,23 @@ import {
   getUserToken,
 } from "../../utils";
 import { useFocusEffect } from "@react-navigation/native";
-import { FilterModal } from "../../components/FilterModal";
+import { FilterModal } from "../../components/FilterModal/index";
 import { btoa } from "react-native-quick-base64";
 import { AppliedFilters } from "../../components/FilterModal/AppliedFilters";
 
 // Helper function to get today's date in YYYY-MM-DD format
-const getTodayDate = () => {
+const getDate = () => {
   const today = new Date();
   return today.toISOString().split("T")[0];
 };
-const getDate = (addDays = 0) => {
+const getTodayDate = (addDays = 0) => {
   const date = new Date();
-  date.setDate(date.getDate() + addDays);
+  date.setDate(date.getDate() - addDays);
   return date.toISOString().split("T")[0];
 };
+
 export const License = () => {
+  
   const [invoiceData, setInvoiceData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,9 +49,13 @@ export const License = () => {
     modelNumber: false,
     companyName: false,
     cameraSerialNumber: false,
-    startDate: getTodayDate(),
-    endDate: getDate(30),
+    startDate: "",
+    endDate: "",
   });
+
+  // Pagination states
+  const [offset, setOffset] = useState(0);
+  const [hasMoreData, setHasMoreData] = useState(true);
 
   const toggleFilterModal = () => {
     setFilterModalVisible(!isFilterModalVisible);
@@ -63,11 +70,13 @@ export const License = () => {
       modelNumber: false,
       companyName: false,
       cameraSerialNumber: false,
-      startDate: getTodayDate(),
-      endDate: getDate(30),
+      startDate: "", // Initially blank
+      endDate: "", // Initially blank
     });
+
     setSearchText("");
-    fetchLicenses(searchText, filters);
+    setOffset(0);
+    fetchLicenses("", filters, 0);
   };
 
   const applyFilter = (newFilters: any) => {
@@ -89,20 +98,28 @@ export const License = () => {
     };
 
     setFilters(updatedFilters);
-    fetchLicenses(searchText, updatedFilters);
+    setOffset(0); // Reset offset
+    fetchLicenses(searchText, updatedFilters, 0);
   };
 
   const fetchLicensesDebounced = useCallback(
     debounce((text: string, filters: any) => {
-      fetchLicenses(text, filters);
-    }, 100),
+      fetchLicenses(text, filters, offset);
+    }, 0),
     []
   );
+
   const handleSearch = (text: string) => {
     setSearchText(text);
-    fetchLicenses(text, filters);
+    setOffset(0); // Reset offset
+    fetchLicenses(text, filters, 0);
   };
-  const fetchLicenses = async (searchText: string, filters: any) => {
+
+  const fetchLicenses = async (
+    searchText: string,
+    filters: any,
+    offset: number
+  ) => {
     try {
       setLoading(true);
       const token = await getUserToken();
@@ -126,12 +143,14 @@ export const License = () => {
           utype: user?.data.user_type,
           text: searchText || "",
           limit: 10,
-          offset: 0,
+          offset: Number(offset),
           filter: filterArray,
           startdate: filters.startDate,
           enddate: filters.endDate,
         },
       };
+
+      console.log("offset --- -- - ", dObject);
       const encodedData = btoa(JSON.stringify(dObject));
       const finalData = { data: encodedData };
 
@@ -147,12 +166,13 @@ export const License = () => {
       );
 
       const result = await response.json();
-      console.log("data length--", result.sql);
-      console.log("data length--", result.data.length);
+      console.log("result", result.sql);
+
       if (!result.data || result.data.length === 0) {
         setInvoiceData([]);
+        setHasMoreData(false);
       } else {
-        const invoiceData = result.data.map((product: any) => ({
+        const newInvoiceData = result.data.map((product: any) => ({
           key: product.id,
           colors:
             product.status === "1"
@@ -165,15 +185,22 @@ export const License = () => {
               : GlobalAppColor.APPRED,
           companyName: product.company_name,
           location: `(${product.location})`,
-          status: product.status === "1" ? "Approved" : "Pending",
+          status: product.status === 1 ? "Approved" : "Pending",
           invoiceNo: product.invoice_number,
           date: convertDateFormat(product.created_on),
           id: product.id,
+          page:"licence"
         }));
-        setInvoiceData(invoiceData);
+
+        if (offset === 0) {
+          setInvoiceData(newInvoiceData);
+        } else {
+          setInvoiceData((prevData) => [...prevData, ...newInvoiceData]);
+        }
       }
     } catch (error) {
       console.error("Error fetching licenses:", error);
+      setInvoiceData([]);
     } finally {
       setLoading(false);
     }
@@ -181,22 +208,23 @@ export const License = () => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchLicensesDebounced(searchText, filters);
+      fetchLicensesDebounced(searchText, filters, offset);
     }, [fetchLicensesDebounced])
   );
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator color={GlobalAppColor.AppBlue} size={"large"} />
-      </View>
-    );
-  }
+  const handleLoadMore = () => {
+    if (hasMoreData && !loading && invoiceData.length >= 10) {
+      setOffset(Number(offset) + 10);
+      fetchLicenses(searchText, filters, offset);
+    }
+  };
+
+  console.log(filters);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
-        <CustomTextInput
+        <TextInput
           inputType="Text"
           inputContainerStyle={styles.searchInput}
           placeholder="Search..."
@@ -204,6 +232,17 @@ export const License = () => {
           onSubmitEditing={() => handleSearch(searchText)}
           returnKeyType="search"
           value={searchText}
+          style={{
+            backgroundColor: GlobalAppColor.AppWhite,
+            marginRight: 10,
+            borderRadius: 4,
+            borderWidth: 1,
+            borderColor: "#BEC3CC",
+            flex: 10,
+            height: 42,
+            paddingLeft: 16,
+            paddingRight: 16,
+          }}
         />
         <Pressable onPress={toggleFilterModal} style={styles.filterButton}>
           <Image
@@ -212,22 +251,53 @@ export const License = () => {
           />
         </Pressable>
       </View>
-      <AppliedFilters filters={filters} onClearAll={clearAllFilters} />
-      <View style={styles.listContainer}>
-        {invoiceData.length === 0 ? (
-          <View style={styles.noDataView}>
-            <Text style={styles.noDataText}>No data available.</Text>
-          </View>
-        ) : (
-          <FlashList
-            data={invoiceData}
-            renderItem={RenderInvoiceItem}
-            keyExtractor={(item) => item.key}
-            ItemSeparatorComponent={SeparatorComponent}
-            estimatedItemSize={100}
-          />
-        )}
-      </View>
+      {Object.values(filters).some(
+        (filter) =>
+          filter !== null && filter !== "" && filter !== false && filter !== 0
+      ) && <AppliedFilters filters={filters} onClearAll={clearAllFilters} />}
+
+      {loading && offset === 0 ? ( // Loading when fetching the first page
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={GlobalAppColor.AppBlue} size={"large"} />
+        </View>
+      ) : (
+        <View style={styles.listContainer}>
+          {invoiceData.length === 0 ? (
+           <View style={styles.noDataContainer}>
+           <Image source={require('../../assets/nodata.png')}   style={styles.noDataImage} />
+           {/* <Text style={styles.noDataText}>No data found</Text> */}
+         </View>
+          ) : (
+            <FlashList
+              data={invoiceData}
+              renderItem={RenderInvoiceItem}
+              estimatedItemSize={20}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
+              onEndReached={handleLoadMore}
+              // ItemSeparatorComponent={SeparatorComponent}
+              onEndReachedThreshold={0.5} // Trigger when reaching 50% from the end
+              ListFooterComponent={
+                loading && offset > 0 ? ( // Show loading spinner at bottom when fetching more data
+                  <ActivityIndicator
+                    color={GlobalAppColor.AppBlue}
+                    style={styles.listFooterLoader}
+                    size="small"
+                  />
+                ) : null
+              }
+            />
+          )}
+        </View>
+      )}
+
+      {/* {isFilterModalVisible && (
+        <FilterModal
+          modalVisible={isFilterModalVisible}
+          onClose={toggleFilterModal}
+          filters={filters}
+          onApplyFilter={applyFilter}
+        />
+      )} */}
       <FilterModal
         modalVisible={isFilterModalVisible}
         setModalVisible={setFilterModalVisible}
@@ -237,8 +307,7 @@ export const License = () => {
     </SafeAreaView>
   );
 };
-
-const SeparatorComponent = () => <View style={{ height: 20 }} />;
+// const SeparatorComponent = () => <View style={{ height: 20 }} />;
 
 const styles = StyleSheet.create({
   container: {
@@ -255,20 +324,21 @@ const styles = StyleSheet.create({
     marginTop: 28,
     flexDirection: "row",
     alignItems: "center",
-    columnGap: 8,
+    display: "flex",
   },
   searchInput: {
     backgroundColor: GlobalAppColor.AppWhite,
-    flex: 1,
+    flex: 10,
   },
   filterButton: {
-    width: 42,
+    width: 52,
     height: 42,
     borderColor: "#BEC3CC",
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 4,
+    flex: 2,
   },
   filterIcon: {
     width: 32,
@@ -282,9 +352,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    textAlign: "center",
   },
   noDataText: {
     fontSize: 18,
     color: "#888",
+    margin: "auto",
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataImage: {
+    width: 250, // Set appropriate width for the image
+    height: 250, // Set appropriate height for the image
+    resizeMode: 'contain', // Optional: adjust the resize mode
+  },
+  listFooterLoader: {
+    marginVertical: 20,
   },
 });

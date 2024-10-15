@@ -10,6 +10,7 @@ export const CameraCompo = ({
   lensData,
   allData,
   parentCallBack,
+  errors
 }) => {
   const [companyFullName, setCompanyFullName] = useState("");
   const [newLensData, setNewLensData] = useState([]);
@@ -126,6 +127,8 @@ export const CameraCompo = ({
             return updatedCameras;
           });
         }}
+        errorMessage={errors.camSerialInfo?.[`model${index + 1}`]} // Access error message for the specific model
+
       />
 
       {/* Dropdown for lens selection */}
@@ -139,6 +142,8 @@ export const CameraCompo = ({
             return updatedLenses;
           });
         }}
+        errorMessage={errors.camSerialInfo?.[`lens${index + 1}`]} // Access error message for the specific model
+
       />
     </View>
   ));
