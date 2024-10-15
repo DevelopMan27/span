@@ -53,8 +53,8 @@ export const Login = () => {
   const signInWithPhoneNumber = async (phoneNumber) => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      console.log("==========");
       setConfirm(confirmation);
+      setLoading(false);
     } catch (error) {
       console.log("Errorrrr", error);
       Alert.alert("Error", JSON.stringify(error));
@@ -90,9 +90,9 @@ export const Login = () => {
         const updatedNumber = addCountryCode(values.mobile);
         // formik.setFieldValue("mobile", updatedNumber);
         signInWithPhoneNumber(updatedNumber);
-        setLoading(false);
       } else {
         console.log(user);
+        Alert.alert("Error", user.message);
         setLoading(false);
       }
     },

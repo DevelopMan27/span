@@ -3,7 +3,15 @@ import React, { useEffect } from "react";
 import { RouteNames } from "./routesNames";
 import { RootStackParamList } from "../type";
 import DrawerNavigation from "./DrawerNavigation";
-import { Alert, Button, Image, Platform, Text } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Button,
+  Image,
+  Platform,
+  Text,
+  View,
+} from "react-native";
 import { Login } from "../screens/Login";
 import { GlobalAppColor } from "../CONST";
 import { Register } from "../screens/Register";
@@ -18,8 +26,9 @@ import ProfileScreen from "./ProfileScreen";
 import CustomHeaderButton from "./CustomHeaderButton";
 import { useNotificationToken } from "../hook/useNotificationToken ";
 import { useLastNotificationResponse } from "../hook/useLastNotificationResponse";
-import { License } from "../screens/License";
-import SplashScreen from "../screens/Splash";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -74,23 +83,42 @@ function SettingsScreenStack() {
 }
 
 const RootNavigation = () => {
-  const { user: firebaseUser } = useAuthContext();
+  const { user: firebaseUser, isInitialized } = useAuthContext();
   const Drawer = createDrawerNavigator();
   useLastNotificationResponse();
   useNotificationToken();
 
+  const splashScreen = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // 3-second delay
+    await SplashScreen.hideAsync();
+  };
+  useEffect(() => {
+    if (isInitialized) {
+      splashScreen();
+    }
+  }, [isInitialized, firebaseUser]);
   return (
     <>
-
+      {/* <Drawer.Navigator>
+        <Drawer.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="MainTabs"
+          component={MainTabs}
+        />
+      </Drawer.Navigator> */}
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
           statusBarColor: GlobalAppColor.AppBlue,
           statusBarStyle: Platform.OS === "android" ? "auto" : undefined,
         }}
-        initialRouteName={RouteNames.Login}
+        initialRouteName={
+          firebaseUser ? RouteNames.DrawerNavigation : RouteNames.Login
+        }
       >
-        {!firebaseUser && (
+        {!firebaseUser ? (
           <>
             <Stack.Screen
               options={{
@@ -123,9 +151,7 @@ const RootNavigation = () => {
               component={OTP}
             />
           </>
-        )}
-
-        {firebaseUser && (
+        ) : (
           <Stack.Screen
             name={RouteNames.DrawerNavigation}
             component={DrawerNavigation}
